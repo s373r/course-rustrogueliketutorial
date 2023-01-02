@@ -13,3 +13,7 @@
 ## Code conduction
 
 This project uses [Gitmoji](https://gitmoji.dev/) for commit messages
+
+## License
+
+[GPLv3+](LICENSE)
