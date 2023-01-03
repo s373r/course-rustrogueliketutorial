@@ -241,13 +241,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "chapter-01-hellorust"
-version = "0.1.0"
-dependencies = [
- "rltk",
-]
-
-[[package]]
 name = "cmake"
 version = "0.1.49"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1280,6 +1273,13 @@ version = "0.8.7"
 source = "git+https://github.com/amethyst/bracket-lib#0a7fcbcd6eb537723272906ebd88382e6a69d483"
 dependencies = [
  "bracket-lib",
+]
+
+[[package]]
+name = "roguelike-tutorial"
+version = "0.1.0"
+dependencies = [
+ "rltk",
 ]
 
 [[package]]
