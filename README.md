@@ -4,7 +4,7 @@
 
 ### Comments
 
-- Some of my thoughts are prefixed with `NOTE:`
+- Some of my thoughts are prefixed with `NOTE(DP):`
     - Example: `// NOTE(DP): Algorithm complexity: O(n)`
 - Resolved course TODOs are prefixed with `DONE:`
     - Example: `// NOTE(DP): ^ Uncomment the above 2 lines to see the compiler error`
