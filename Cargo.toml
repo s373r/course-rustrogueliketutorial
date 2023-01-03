@@ -7,4 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rltk = { version = "0.8.0" }
+# NOTE(DP): Build fix (2022-01-03)
+#           - https://github.com/amethyst/rustrogueliketutorial/issues/166#issuecomment-872348864
+#           - https://github.com/amethyst/bracket-lib/issues/301#issuecomment-1272312136
+rltk = { git = "https://github.com/amethyst/bracket-lib" }
