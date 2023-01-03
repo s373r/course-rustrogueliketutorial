@@ -1,5 +1,9 @@
 # Course: Roguelike Tutorial - in Rust
 
+Course link: https://github.com/amethyst/rustrogueliketutorial
+
+Status: 🚧
+
 ### Index legend
 
 - 📝 - a link to a book page
