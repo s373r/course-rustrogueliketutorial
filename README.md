@@ -14,7 +14,7 @@ Status: 🚧
 ## Index
 
 - [📝 Introduction](https://bfnightly.bracketproductions.com/rustbook/chapter_0.html)
-- 🚧 1. Building for the Web
+- [📝 1. Building for the Web](https://bfnightly.bracketproductions.com/rustbook/webbuild.html)
 - 🚧 2. Section 1 - Hello Rust
   - 🚧 2.1. Entities and Components
   - 🚧 2.2. Walking A Map
