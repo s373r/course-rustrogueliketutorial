@@ -4,6 +4,53 @@ Course link: https://github.com/amethyst/rustrogueliketutorial
 
 Status: 🚧
 
+## Preparations
+
+1. Install WASM-related components
+```shell
+rustup target add wasm32-unknown-unknown
+cargo install wasm-bindgen-cli
+```
+2. `[Optional]` Install system dependencies (only for the native target): `cmake`, `c++`, `fontconfig`)
+```shell
+# For Fedora
+sudo dnf install cmake g++ fontconfig-devel`
+```
+3. `[Optional]` Install `simple-http-server` for file serving
+```shell
+cargo install simple-http-server
+```
+
+## Run
+
+Build
+### Native
+```shell
+cargo build
+```
+Run
+```shell
+cargo run
+```
+
+### Web
+
+Build
+```shell
+cargo build --release --target wasm32-unknown-unknown
+wasm-bindgen target/wasm32-unknown-unknown/release/*wasm --out-dir wasm --no-modules --no-typescript
+```
+Serve
+```shell
+simple-http-server -- wasm
+```
+... or use Python for serving
+```shell
+python3 -m http.server -d wasm
+```
+
+Open http://0.0.0.0:8000/
+
 ### Index legend
 
 - 📝 - a link to a book page
