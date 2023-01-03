@@ -11,7 +11,7 @@ Status: 🚧
 rustup target add wasm32-unknown-unknown
 cargo install wasm-bindgen-cli
 ```
-2. `[Optional]` Install system dependencies (only for the native target): `cmake`, `c++`, `fontconfig`)
+2. `[Optional]` Install system dependencies for native target: `cmake`, `c++`, `fontconfig`
 ```shell
 # For Fedora
 sudo dnf install cmake g++ fontconfig-devel`
