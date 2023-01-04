@@ -60,7 +60,7 @@ Open http://0.0.0.0:8000/
 - [📝 2. Section 1 - Hello Rust](https://bfnightly.bracketproductions.com/rustbook/chapter_1.html)
   - [📝 2.1. Entities and Components](https://bfnightly.bracketproductions.com/rustbook/chapter_2.html)
   - [📝 2.2. Walking A Map](https://bfnightly.bracketproductions.com/rustbook/chapter_3.html)
-  - 🚧 2.3. A More Interesting Map
+  - [📝 2.3. A More Interesting Map](https://bfnightly.bracketproductions.com/rustbook/chapter_4.html)
   - 🚧 2.4. Field of View
   - 🚧 2.5. Monsters
   - 🚧 2.6. Dealing Damage
