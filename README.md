@@ -59,7 +59,7 @@ Open http://0.0.0.0:8000/
 - [📝 1. Building for the Web](https://bfnightly.bracketproductions.com/rustbook/webbuild.html)
 - [📝 2. Section 1 - Hello Rust](https://bfnightly.bracketproductions.com/rustbook/chapter_1.html)
   - [📝 2.1. Entities and Components](https://bfnightly.bracketproductions.com/rustbook/chapter_2.html)
-  - 🚧 2.2. Walking A Map
+  - [📝 2.2. Walking A Map](https://bfnightly.bracketproductions.com/rustbook/chapter_3.html)
   - 🚧 2.3. A More Interesting Map
   - 🚧 2.4. Field of View
   - 🚧 2.5. Monsters
