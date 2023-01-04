@@ -14,7 +14,7 @@ cargo install wasm-bindgen-cli
 2. `[Optional]` Install system dependencies for native target: `cmake`, `c++`, `fontconfig`
 ```shell
 # For Fedora
-sudo dnf install cmake g++ fontconfig-devel`
+sudo dnf install cmake g++ fontconfig-devel
 ```
 3. `[Optional]` Install `simple-http-server` for file serving
 ```shell
@@ -23,12 +23,7 @@ cargo install simple-http-server
 
 ## Run
 
-Build
 ### Native
-```shell
-cargo build
-```
-Run
 ```shell
 cargo run
 ```
