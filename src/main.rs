@@ -1,7 +1,6 @@
 use rltk::{GameState, Rltk, VirtualKeyCode, RGB};
 use specs::prelude::*;
 use specs_derive::Component;
-use std::cmp::{max, min};
 
 struct State {
     ecs: World,
@@ -72,9 +71,8 @@ fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     let mut players = ecs.write_storage::<Player>();
 
     for (_player, pos) in (&mut players, &mut positions).join() {
-        // TODO(DP): fix clippy warnings
-        pos.x = min(79, max(0, pos.x + delta_x));
-        pos.y = min(49, max(0, pos.y + delta_y));
+        pos.x = (pos.x + delta_x).clamp(0, 79);
+        pos.y = (pos.y + delta_y).clamp(0, 49);
     }
 }
 
