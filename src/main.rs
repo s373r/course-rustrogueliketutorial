@@ -78,16 +78,16 @@ fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
 
 fn player_input(gs: &mut State, ctx: &mut Rltk) {
     // Player movement
-    // TODO(DP): refactor
-    match ctx.key {
-        None => {} // Nothing happened
-        Some(key) => match key {
-            VirtualKeyCode::Left => try_move_player(-1, 0, &mut gs.ecs),
-            VirtualKeyCode::Right => try_move_player(1, 0, &mut gs.ecs),
-            VirtualKeyCode::Up => try_move_player(0, -1, &mut gs.ecs),
-            VirtualKeyCode::Down => try_move_player(0, 1, &mut gs.ecs),
-            _ => {}
-        },
+    let optional_player_movement = ctx.key.and_then(|key| match key {
+        VirtualKeyCode::Left => Some((-1, 0)),
+        VirtualKeyCode::Right => Some((1, 0)),
+        VirtualKeyCode::Up => Some((0, -1)),
+        VirtualKeyCode::Down => Some((0, 1)),
+        _ => None,
+    });
+
+    if let Some((delta_x, delta_y)) = optional_player_movement {
+        try_move_player(delta_x, delta_y, &mut gs.ecs);
     }
 }
 
