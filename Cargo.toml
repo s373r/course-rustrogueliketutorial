@@ -11,3 +11,5 @@ resolver = "2"
 # NOTE(DP): Build fix (2022-01-03)
 #           https://github.com/amethyst/bracket-lib/issues/318#issuecomment-1359687927
 rltk = {version="~0.8", features=["webgpu"], default-features=false }
+specs = "0.16.1"
+specs-derive = "0.4.1"
