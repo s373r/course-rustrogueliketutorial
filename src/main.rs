@@ -1,6 +1,8 @@
 use rltk::{GameState, Rltk, VirtualKeyCode, RGB};
 use specs::prelude::*;
-use specs_derive::Component;
+
+mod components;
+use components::*;
 
 struct State {
     ecs: World,
@@ -31,22 +33,6 @@ impl GameState for State {
         }
     }
 }
-
-#[derive(Component)]
-struct Position {
-    x: i32,
-    y: i32,
-}
-
-#[derive(Component)]
-struct Renderable {
-    glyph: rltk::FontCharType,
-    fg: RGB,
-    bg: RGB,
-}
-
-#[derive(Component, Debug)]
-struct Player {}
 
 #[derive(PartialEq, Copy, Clone)]
 enum TileType {
