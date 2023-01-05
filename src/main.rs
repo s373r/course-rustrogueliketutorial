@@ -1,10 +1,12 @@
 mod components;
 mod map;
+mod map_indexing_system;
 mod monster_ai_system;
 mod player;
 mod rect;
 mod visibility_system;
 
+use crate::map_indexing_system::MapIndexingSystem;
 use components::*;
 use map::*;
 use monster_ai_system::MonsterAI;
@@ -28,12 +30,13 @@ pub struct State {
 impl State {
     fn run_systems(&mut self) {
         let mut vis = VisibilitySystem {};
-
         vis.run_now(&self.ecs);
 
         let mut mob = MonsterAI {};
-
         mob.run_now(&self.ecs);
+
+        let mut map_index = MapIndexingSystem {};
+        map_index.run_now(&self.ecs);
 
         self.ecs.maintain();
     }
@@ -83,6 +86,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Viewshed>();
     gs.ecs.register::<Monster>();
     gs.ecs.register::<Name>();
+    gs.ecs.register::<BlocksTile>();
 
     let map = Map::new_map_rooms_and_corridors();
     let mut rng = RandomNumberGenerator::new();
@@ -111,6 +115,7 @@ fn main() -> rltk::BError {
             .with(Name {
                 name: format!("{} #{}", &name, i),
             })
+            .with(BlocksTile {})
             .build();
     }
 
