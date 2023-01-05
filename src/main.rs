@@ -87,6 +87,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Monster>();
     gs.ecs.register::<Name>();
     gs.ecs.register::<BlocksTile>();
+    gs.ecs.register::<CombatStats>();
 
     let map = Map::new_map_rooms_and_corridors();
     let mut rng = RandomNumberGenerator::new();
@@ -116,6 +117,12 @@ fn main() -> rltk::BError {
                 name: format!("{} #{}", &name, i),
             })
             .with(BlocksTile {})
+            .with(CombatStats {
+                max_hp: 16,
+                hp: 16,
+                defense: 1,
+                power: 4,
+            })
             .build();
     }
 
@@ -143,6 +150,12 @@ fn main() -> rltk::BError {
         })
         .with(Name {
             name: "Player".to_string(),
+        })
+        .with(CombatStats {
+            max_hp: 30,
+            hp: 30,
+            defense: 2,
+            power: 5,
         })
         .build();
 
