@@ -60,13 +60,11 @@ pub fn new_map_rooms_and_corridors() -> Vec<TileType> {
         let x = rng.roll_dice(1, 80 - w - 1) - 1;
         let y = rng.roll_dice(1, 50 - h - 1) - 1;
         let new_room = Rect::new(x, y, w, h);
-        let mut ok = true;
-        for other_room in rooms.iter() {
-            if new_room.intersect(other_room) {
-                ok = false
-            }
-        }
-        if ok {
+        let has_intersect_other_rooms = rooms
+            .iter()
+            .any(|another_room| new_room.intersect(another_room));
+
+        if !has_intersect_other_rooms {
             apply_room_to_map(&new_room, &mut map);
             rooms.push(new_room);
         }
