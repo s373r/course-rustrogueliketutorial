@@ -62,7 +62,7 @@ Open http://0.0.0.0:8000/
   - [📝 2.2. Walking A Map](https://bfnightly.bracketproductions.com/rustbook/chapter_3.html)
   - [📝 2.3. A More Interesting Map](https://bfnightly.bracketproductions.com/rustbook/chapter_4.html)
   - [📝 2.4. Field of View](https://bfnightly.bracketproductions.com/rustbook/chapter_5.html)
-  - 🚧 2.5. Monsters
+  - [📝 2.5. Monsters](https://bfnightly.bracketproductions.com/rustbook/chapter_6.html)
   - 🚧 2.6. Dealing Damage
   - 🚧 2.7. User Interface
   - 🚧 2.8. Items and Inventory
