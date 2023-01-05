@@ -81,8 +81,8 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
     if let Some((delta_x, delta_y)) = optional_player_movement {
         try_move_player(delta_x, delta_y, &mut gs.ecs);
 
-        RunState::Running
+        RunState::PlayerTurn
     } else {
-        RunState::Paused
+        RunState::AwaitingInput
     }
 }

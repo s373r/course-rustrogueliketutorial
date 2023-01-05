@@ -22,13 +22,14 @@ use visibility_system::*;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum RunState {
-    Paused,
-    Running,
+    AwaitingInput,
+    PreRun,
+    PlayerTurn,
+    MonsterTurn,
 }
 
 pub struct State {
     pub ecs: World,
-    pub run_state: RunState,
 }
 
 impl State {
@@ -56,15 +57,31 @@ impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
         ctx.cls();
 
-        if self.run_state == RunState::Running {
-            self.run_systems();
+        let mut new_run_state = *self.ecs.fetch::<RunState>();
 
-            damage_system::delete_the_dead(&mut self.ecs);
+        new_run_state = match new_run_state {
+            RunState::PreRun => {
+                self.run_systems();
+                RunState::AwaitingInput
+            }
+            RunState::AwaitingInput => player_input(self, ctx),
+            RunState::PlayerTurn => {
+                self.run_systems();
+                RunState::MonsterTurn
+            }
+            RunState::MonsterTurn => {
+                self.run_systems();
+                RunState::AwaitingInput
+            }
+        };
 
-            self.run_state = RunState::Paused;
-        } else {
-            self.run_state = player_input(self, ctx);
+        {
+            let mut run_writer = self.ecs.write_resource::<RunState>();
+
+            *run_writer = new_run_state;
         }
+
+        damage_system::delete_the_dead(&mut self.ecs);
 
         draw_map(&self.ecs, ctx);
 
@@ -88,10 +105,7 @@ fn main() -> rltk::BError {
     let context = RltkBuilder::simple80x50()
         .with_title("Roguelike Tutorial")
         .build()?;
-    let mut gs = State {
-        ecs: World::new(),
-        run_state: RunState::Running,
-    };
+    let mut gs = State { ecs: World::new() };
 
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();
@@ -176,7 +190,7 @@ fn main() -> rltk::BError {
         .build();
 
     gs.ecs.insert(player_entity);
-    gs.ecs.insert(RunState::Running);
+    gs.ecs.insert(RunState::PreRun);
 
     rltk::main_loop(context, gs)
 }
