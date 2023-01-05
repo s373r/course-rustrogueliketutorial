@@ -1,11 +1,13 @@
 mod components;
 mod map;
+mod monster_ai_system;
 mod player;
 mod rect;
 mod visibility_system;
 
 use components::*;
 use map::*;
+use monster_ai_system::MonsterAI;
 use player::*;
 use rect::*;
 use rltk::{GameState, RandomNumberGenerator, Rltk, RGB};
@@ -21,6 +23,10 @@ impl State {
         let mut vis = VisibilitySystem {};
 
         vis.run_now(&self.ecs);
+
+        let mut mob = MonsterAI {};
+
+        mob.run_now(&self.ecs);
 
         self.ecs.maintain();
     }
@@ -61,6 +67,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Renderable>();
     gs.ecs.register::<Player>();
     gs.ecs.register::<Viewshed>();
+    gs.ecs.register::<Monster>();
 
     let map = Map::new_map_rooms_and_corridors();
     let mut rng = RandomNumberGenerator::new();
@@ -85,6 +92,7 @@ fn main() -> rltk::BError {
                 range: 8,
                 dirty: true,
             })
+            .with(Monster {})
             .build();
     }
 
