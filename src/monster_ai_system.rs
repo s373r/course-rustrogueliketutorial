@@ -1,6 +1,7 @@
-use crate::components::{Monster, Name, Position, Viewshed};
+use crate::components::{Monster, Position, Viewshed, WantsToMelee};
 use crate::map::Map;
-use rltk::{console, Point};
+use crate::RunState;
+use rltk::Point;
 use specs::prelude::*;
 
 pub struct MonsterAI {}
@@ -9,28 +10,53 @@ impl<'a> System<'a> for MonsterAI {
     type SystemData = (
         WriteExpect<'a, Map>,
         ReadExpect<'a, Point>,
+        ReadExpect<'a, Entity>,
+        ReadExpect<'a, RunState>,
+        Entities<'a>,
         WriteStorage<'a, Viewshed>,
         ReadStorage<'a, Monster>,
-        ReadStorage<'a, Name>,
         WriteStorage<'a, Position>,
+        WriteStorage<'a, WantsToMelee>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (map, player_pos, mut viewshed, monster, name, mut position) = data;
+        let (
+            mut map,
+            player_pos,
+            player_entity,
+            _run_state,
+            entities,
+            mut viewshed,
+            monster,
+            mut position,
+            mut wants_to_melee,
+        ) = data;
 
-        for (mut viewshed, _monster, name, mut pos) in
-            (&mut viewshed, &monster, &name, &mut position).join()
+        for (entity, mut viewshed, _monster, mut pos) in
+            (&entities, &mut viewshed, &monster, &mut position).join()
         {
             if viewshed.visible_tiles.contains(&*player_pos) {
                 let distance =
                     rltk::DistanceAlg::Pythagoras.distance2d(Point::new(pos.x, pos.y), *player_pos);
 
                 if distance < 1.5 {
-                    // Attack goes here
-                    console::log(format!("{} shouts insults", name.name));
+                    wants_to_melee
+                        .insert(
+                            entity,
+                            WantsToMelee {
+                                target: *player_entity,
+                            },
+                        )
+                        .expect("Unable to insert attack");
+
                     continue;
                 }
 
+                if !viewshed.visible_tiles.contains(&*player_pos) {
+                    continue;
+                }
+
+                // Path to the player
                 let path = rltk::a_star_search(
                     map.xy_idx(pos.x, pos.y) as i32,
                     map.xy_idx(player_pos.x, player_pos.y) as i32,
@@ -38,8 +64,18 @@ impl<'a> System<'a> for MonsterAI {
                 );
 
                 if path.success && path.steps.len() > 1 {
-                    pos.x = path.steps[1] as i32 % map.width;
-                    pos.y = path.steps[1] as i32 / map.width;
+                    let mut idx = map.xy_idx(pos.x, pos.y);
+
+                    map.blocked[idx] = false;
+
+                    let next_step = path.steps[1] as i32;
+
+                    pos.x = next_step % map.width;
+                    pos.y = next_step / map.width;
+                    idx = map.xy_idx(pos.x, pos.y);
+
+                    map.blocked[idx] = true;
+
                     viewshed.dirty = true;
                 }
             }
