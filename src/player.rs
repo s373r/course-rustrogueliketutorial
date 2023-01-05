@@ -1,7 +1,7 @@
 use super::{Map, Player, Position, State, TileType};
 use crate::components::Viewshed;
 use crate::RunState;
-use rltk::{Rltk, VirtualKeyCode};
+use rltk::{Point, Rltk, VirtualKeyCode};
 use specs::prelude::*;
 
 pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
@@ -18,6 +18,10 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
         if map.tiles[destination_idx] != TileType::Wall {
             pos.x = new_x;
             pos.y = new_y;
+
+            let mut player_pos = ecs.write_resource::<Point>();
+            player_pos.x = pos.x;
+            player_pos.y = pos.y;
 
             viewshed.dirty = true;
         }

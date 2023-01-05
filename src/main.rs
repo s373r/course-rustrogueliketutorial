@@ -10,7 +10,7 @@ use map::*;
 use monster_ai_system::MonsterAI;
 use player::*;
 use rect::*;
-use rltk::{GameState, RandomNumberGenerator, Rltk, RGB};
+use rltk::{GameState, Point, RandomNumberGenerator, Rltk, RGB};
 use specs::prelude::*;
 use visibility_system::*;
 
@@ -112,6 +112,7 @@ fn main() -> rltk::BError {
 
     let (player_x, player_y) = map.rooms.first().unwrap().center();
 
+    gs.ecs.insert(Point::new(player_x, player_y));
     gs.ecs.insert(map);
 
     gs.ecs
