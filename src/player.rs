@@ -38,6 +38,12 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             Right | L | D => Some((1, 0)),
             Up | K | W => Some((0, -1)),
             Down | J | S => Some((0, 1)),
+            // Diagonals
+            E | Y => Some((1, -1)),
+            Q | U => Some((-1, -1)),
+            X | N => Some((1, 1)),
+            Z | B => Some((-1, 1)),
+            //
             _ => None,
         })
     };
