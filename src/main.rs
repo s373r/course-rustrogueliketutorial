@@ -1,17 +1,16 @@
-use rltk::{GameState, RandomNumberGenerator, Rltk, RGB};
-use specs::prelude::*;
-
 mod components;
-use components::*;
 mod map;
-use map::*;
 mod player;
-use player::*;
 mod rect;
 mod visibility_system;
-use visibility_system::*;
 
+use components::*;
+use map::*;
+use player::*;
 use rect::*;
+use rltk::{GameState, RandomNumberGenerator, Rltk, RGB};
+use specs::prelude::*;
+use visibility_system::*;
 
 pub struct State {
     pub ecs: World,
