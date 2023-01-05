@@ -82,15 +82,16 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Player>();
     gs.ecs.register::<Viewshed>();
     gs.ecs.register::<Monster>();
+    gs.ecs.register::<Name>();
 
     let map = Map::new_map_rooms_and_corridors();
     let mut rng = RandomNumberGenerator::new();
 
-    for room in map.rooms.iter().skip(1) {
+    for (i, room) in map.rooms.iter().skip(1).enumerate() {
         let (x, y) = room.center();
-        let glyph = match rng.roll_dice(1, 2) {
-            1 => rltk::to_cp437('g'),
-            _ => rltk::to_cp437('o'),
+        let (glyph, name) = match rng.roll_dice(1, 2) {
+            1 => (rltk::to_cp437('g'), "Goblin".to_string()),
+            _ => (rltk::to_cp437('o'), "Orc".to_string()),
         };
 
         gs.ecs
@@ -107,6 +108,9 @@ fn main() -> rltk::BError {
                 dirty: true,
             })
             .with(Monster {})
+            .with(Name {
+                name: format!("{} #{}", &name, i),
+            })
             .build();
     }
 
@@ -131,6 +135,9 @@ fn main() -> rltk::BError {
             visible_tiles: Vec::new(),
             range: 8,
             dirty: true,
+        })
+        .with(Name {
+            name: "Player".to_string(),
         })
         .build();
 
