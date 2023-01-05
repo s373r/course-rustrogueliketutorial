@@ -176,6 +176,7 @@ fn main() -> rltk::BError {
         .build();
 
     gs.ecs.insert(player_entity);
+    gs.ecs.insert(RunState::Running);
 
     rltk::main_loop(context, gs)
 }
