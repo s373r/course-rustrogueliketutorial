@@ -21,13 +21,17 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
 
 pub fn player_input(gs: &mut State, ctx: &mut Rltk) {
     // Player movement
-    let optional_player_movement = ctx.key.and_then(|key| match key {
-        VirtualKeyCode::Left => Some((-1, 0)),
-        VirtualKeyCode::Right => Some((1, 0)),
-        VirtualKeyCode::Up => Some((0, -1)),
-        VirtualKeyCode::Down => Some((0, 1)),
-        _ => None,
-    });
+    let optional_player_movement = {
+        use VirtualKeyCode::*;
+
+        ctx.key.and_then(|key| match key {
+            Left | H | A => Some((-1, 0)),
+            Right | L | D => Some((1, 0)),
+            Up | K | W => Some((0, -1)),
+            Down | J | S => Some((0, 1)),
+            _ => None,
+        })
+    };
 
     if let Some((delta_x, delta_y)) = optional_player_movement {
         try_move_player(delta_x, delta_y, &mut gs.ecs);
