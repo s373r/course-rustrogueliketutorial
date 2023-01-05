@@ -1,19 +1,32 @@
 use super::{Map, Player, Position, State};
-use crate::components::Viewshed;
+use crate::components::{CombatStats, Viewshed};
 use crate::RunState;
-use rltk::{Point, Rltk, VirtualKeyCode};
+use rltk::{console, Point, Rltk, VirtualKeyCode};
 use specs::prelude::*;
 
 pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     let mut positions = ecs.write_storage::<Position>();
     let mut players = ecs.write_storage::<Player>();
     let mut viewsheds = ecs.write_storage::<Viewshed>();
+    let combat_stats = ecs.read_storage::<CombatStats>();
     let map = ecs.fetch::<Map>();
 
     for (_player, pos, viewshed) in (&mut players, &mut positions, &mut viewsheds).join() {
         let new_x = (pos.x + delta_x).clamp(0, 79);
         let new_y = (pos.y + delta_y).clamp(0, 79);
         let destination_idx = map.xy_idx(new_x, new_y);
+
+        for potential_target in map.tile_content[destination_idx].iter() {
+            let target = combat_stats.get(*potential_target);
+            match target {
+                None => {}
+                Some(_) => {
+                    // Attack it
+                    console::log("From Hell's Heart, I stab thee!".to_string());
+                    return; // So we don't move after attacking
+                }
+            }
+        }
 
         if !map.blocked[destination_idx] {
             pos.x = new_x;
