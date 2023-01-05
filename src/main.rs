@@ -14,8 +14,15 @@ use rltk::{GameState, RandomNumberGenerator, Rltk, RGB};
 use specs::prelude::*;
 use visibility_system::*;
 
+#[derive(PartialEq, Copy, Clone)]
+pub enum RunState {
+    Paused,
+    Running,
+}
+
 pub struct State {
     pub ecs: World,
+    pub run_state: RunState,
 }
 
 impl State {
@@ -36,8 +43,12 @@ impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
         ctx.cls();
 
-        player_input(self, ctx);
-        self.run_systems();
+        if self.run_state == RunState::Running {
+            self.run_systems();
+            self.run_state = RunState::Paused;
+        } else {
+            self.run_state = player_input(self, ctx);
+        }
 
         draw_map(&self.ecs, ctx);
 
@@ -61,7 +72,10 @@ fn main() -> rltk::BError {
     let context = RltkBuilder::simple80x50()
         .with_title("Roguelike Tutorial")
         .build()?;
-    let mut gs = State { ecs: World::new() };
+    let mut gs = State {
+        ecs: World::new(),
+        run_state: RunState::Running,
+    };
 
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();

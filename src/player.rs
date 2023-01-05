@@ -1,5 +1,6 @@
 use super::{Map, Player, Position, State, TileType};
 use crate::components::Viewshed;
+use crate::RunState;
 use rltk::{Rltk, VirtualKeyCode};
 use specs::prelude::*;
 
@@ -23,7 +24,7 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     }
 }
 
-pub fn player_input(gs: &mut State, ctx: &mut Rltk) {
+pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
     // Player movement
     let optional_player_movement = {
         use VirtualKeyCode::*;
@@ -39,5 +40,9 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) {
 
     if let Some((delta_x, delta_y)) = optional_player_movement {
         try_move_player(delta_x, delta_y, &mut gs.ecs);
+
+        RunState::Running
+    } else {
+        RunState::Paused
     }
 }
