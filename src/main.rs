@@ -8,6 +8,9 @@ use map::*;
 mod player;
 use player::*;
 mod rect;
+mod visibility_system;
+use visibility_system::*;
+
 use rect::*;
 
 pub struct State {
@@ -16,6 +19,10 @@ pub struct State {
 
 impl State {
     fn run_systems(&mut self) {
+        let mut vis = VisibilitySystem {};
+
+        vis.run_now(&self.ecs);
+
         self.ecs.maintain();
     }
 }
