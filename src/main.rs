@@ -1,4 +1,4 @@
-use rltk::{GameState, Rltk, RGB};
+use rltk::{GameState, RandomNumberGenerator, Rltk, RGB};
 use specs::prelude::*;
 
 mod components;
@@ -64,14 +64,20 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Viewshed>();
 
     let map = Map::new_map_rooms_and_corridors();
+    let mut rng = RandomNumberGenerator::new();
 
     for room in map.rooms.iter().skip(1) {
         let (x, y) = room.center();
+        let glyph = match rng.roll_dice(1, 2) {
+            1 => rltk::to_cp437('g'),
+            _ => rltk::to_cp437('o'),
+        };
+
         gs.ecs
             .create_entity()
             .with(Position { x, y })
             .with(Renderable {
-                glyph: rltk::to_cp437('g'),
+                glyph,
                 fg: RGB::named(rltk::RED),
                 bg: RGB::named(rltk::BLACK),
             })
