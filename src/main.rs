@@ -1,12 +1,16 @@
 mod components;
+mod damage_system;
 mod map;
 mod map_indexing_system;
+mod melee_combat_system;
 mod monster_ai_system;
 mod player;
 mod rect;
 mod visibility_system;
 
+use crate::damage_system::DamageSystem;
 use crate::map_indexing_system::MapIndexingSystem;
+use crate::melee_combat_system::MeleeCombatSystem;
 use components::*;
 use map::*;
 use monster_ai_system::MonsterAI;
@@ -38,6 +42,12 @@ impl State {
         let mut map_index = MapIndexingSystem {};
         map_index.run_now(&self.ecs);
 
+        let mut melee_combat_system = MeleeCombatSystem {};
+        melee_combat_system.run_now(&self.ecs);
+
+        let mut damage_system = DamageSystem {};
+        damage_system.run_now(&self.ecs);
+
         self.ecs.maintain();
     }
 }
@@ -48,6 +58,9 @@ impl GameState for State {
 
         if self.run_state == RunState::Running {
             self.run_systems();
+
+            damage_system::delete_the_dead(&mut self.ecs);
+
             self.run_state = RunState::Paused;
         } else {
             self.run_state = player_input(self, ctx);
@@ -88,6 +101,8 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Name>();
     gs.ecs.register::<BlocksTile>();
     gs.ecs.register::<CombatStats>();
+    gs.ecs.register::<WantsToMelee>();
+    gs.ecs.register::<SufferDamage>();
 
     let map = Map::new_map_rooms_and_corridors();
     let mut rng = RandomNumberGenerator::new();
