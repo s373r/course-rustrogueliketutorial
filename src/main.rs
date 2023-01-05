@@ -49,6 +49,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();
     gs.ecs.register::<Player>();
+    gs.ecs.register::<Viewshed>();
 
     let map = Map::new_map_rooms_and_corridors();
     let (player_x, player_y) = map.rooms.first().unwrap().center();
@@ -67,6 +68,10 @@ fn main() -> rltk::BError {
             bg: RGB::named(rltk::BLACK),
         })
         .with(Player {})
+        .with(Viewshed {
+            visible_tiles: Vec::new(),
+            range: 8,
+        })
         .build();
 
     rltk::main_loop(context, gs)
