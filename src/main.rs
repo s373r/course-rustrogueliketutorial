@@ -1,5 +1,6 @@
 mod components;
 mod damage_system;
+mod gui;
 mod map;
 mod map_indexing_system;
 mod melee_combat_system;
@@ -9,6 +10,7 @@ mod rect;
 mod visibility_system;
 
 use crate::damage_system::DamageSystem;
+use crate::gui::draw_ui;
 use crate::map_indexing_system::MapIndexingSystem;
 use crate::melee_combat_system::MeleeCombatSystem;
 use components::*;
@@ -96,6 +98,8 @@ impl GameState for State {
                 ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph)
             }
         }
+
+        draw_ui(&self.ecs, ctx)
     }
 }
 
