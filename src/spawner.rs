@@ -36,12 +36,12 @@ pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
 
 /// Spawns a random monster at a given location
 pub fn random_monster(ecs: &mut World, x: i32, y: i32) {
-    // TODO(DP): make a trivial refactoring
-    let roll: i32;
-    {
+    let roll = {
         let mut rng = ecs.write_resource::<RandomNumberGenerator>();
-        roll = rng.roll_dice(1, 2);
-    }
+
+        rng.roll_dice(1, 2)
+    };
+
     match roll {
         1 => orc(ecs, x, y),
         _ => goblin(ecs, x, y),
