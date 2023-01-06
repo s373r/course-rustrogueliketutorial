@@ -1,5 +1,6 @@
 mod components;
 mod damage_system;
+mod game_log;
 mod gui;
 mod map;
 mod map_indexing_system;
@@ -10,6 +11,7 @@ mod rect;
 mod visibility_system;
 
 use crate::damage_system::DamageSystem;
+use crate::game_log::GameLog;
 use crate::gui::draw_ui;
 use crate::map_indexing_system::MapIndexingSystem;
 use crate::melee_combat_system::MeleeCombatSystem;
@@ -195,6 +197,9 @@ fn main() -> rltk::BError {
 
     gs.ecs.insert(player_entity);
     gs.ecs.insert(RunState::PreRun);
+    gs.ecs.insert(GameLog {
+        entries: vec!["Welcome to Rusty Roguelike".to_string()],
+    });
 
     rltk::main_loop(context, gs)
 }
