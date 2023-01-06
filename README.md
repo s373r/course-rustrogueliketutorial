@@ -64,7 +64,7 @@ Open http://0.0.0.0:8000/
   - [📝 2.4. Field of View](https://bfnightly.bracketproductions.com/rustbook/chapter_5.html)
   - [📝 2.5. Monsters](https://bfnightly.bracketproductions.com/rustbook/chapter_6.html)
   - [📝 2.6. Dealing Damage](https://bfnightly.bracketproductions.com/rustbook/chapter_7.html)
-  - 🚧 2.7. User Interface
+  - [📝 2.7. User Interface](https://bfnightly.bracketproductions.com/rustbook/chapter_8.html)
   - 🚧 2.8. Items and Inventory
   - 🚧 2.9. Ranged Scrolls/Targeting
   - 🚧 2.10. Saving and Loading
