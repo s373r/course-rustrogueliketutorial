@@ -8,6 +8,7 @@ mod melee_combat_system;
 mod monster_ai_system;
 mod player;
 mod rect;
+mod spawner;
 mod visibility_system;
 
 use crate::damage_system::DamageSystem;
@@ -127,41 +128,14 @@ fn main() -> rltk::BError {
     gs.ecs.register::<WantsToMelee>();
     gs.ecs.register::<SufferDamage>();
 
+    gs.ecs.insert(RandomNumberGenerator::new());
+
     let map = Map::new_map_rooms_and_corridors();
-    let mut rng = RandomNumberGenerator::new();
 
-    for (i, room) in map.rooms.iter().skip(1).enumerate() {
+    for room in map.rooms.iter().skip(1) {
         let (x, y) = room.center();
-        let (glyph, name) = match rng.roll_dice(1, 2) {
-            1 => (rltk::to_cp437('g'), "Goblin".to_string()),
-            _ => (rltk::to_cp437('o'), "Orc".to_string()),
-        };
 
-        gs.ecs
-            .create_entity()
-            .with(Position { x, y })
-            .with(Renderable {
-                glyph,
-                fg: RGB::named(rltk::RED),
-                bg: RGB::named(rltk::BLACK),
-            })
-            .with(Viewshed {
-                visible_tiles: Vec::new(),
-                range: 8,
-                dirty: true,
-            })
-            .with(Monster {})
-            .with(Name {
-                name: format!("{} #{}", &name, i),
-            })
-            .with(BlocksTile {})
-            .with(CombatStats {
-                max_hp: 16,
-                hp: 16,
-                defense: 1,
-                power: 4,
-            })
-            .build();
+        spawner::random_monster(&mut gs.ecs, x, y);
     }
 
     let (player_x, player_y) = map.rooms.first().unwrap().center();
@@ -169,40 +143,14 @@ fn main() -> rltk::BError {
     gs.ecs.insert(Point::new(player_x, player_y));
     gs.ecs.insert(map);
 
-    let player_entity = gs
-        .ecs
-        .create_entity()
-        .with(Position {
-            x: player_x,
-            y: player_y,
-        })
-        .with(Renderable {
-            glyph: rltk::to_cp437('@'),
-            fg: RGB::named(rltk::YELLOW),
-            bg: RGB::named(rltk::BLACK),
-        })
-        .with(Player {})
-        .with(Viewshed {
-            visible_tiles: Vec::new(),
-            range: 8,
-            dirty: true,
-        })
-        .with(Name {
-            name: "Player".to_string(),
-        })
-        .with(CombatStats {
-            max_hp: 30,
-            hp: 30,
-            defense: 2,
-            power: 5,
-        })
-        .build();
+    let player_entity = spawner::player(&mut gs.ecs, player_x, player_y);
 
     gs.ecs.insert(player_entity);
     gs.ecs.insert(RunState::PreRun);
     gs.ecs.insert(GameLog {
         entries: vec!["Welcome to Rusty Roguelike".to_string()],
     });
+    gs.ecs.insert(RandomNumberGenerator::new());
 
     rltk::main_loop(context, gs)
 }
