@@ -165,7 +165,6 @@ pub fn show_inventory(gs: &mut State, ctx: &mut Rltk) -> (ItemMenuResult, Option
     let backpack = gs.ecs.read_storage::<InBackpack>();
     let entities = gs.ecs.entities();
 
-    // TODO(DP): merge item iteration?
     let inventory = (&backpack, &names)
         .join()
         .filter(|item| item.0.owner == *player_entity);
