@@ -21,9 +21,9 @@ pub struct Map {
 }
 
 impl Map {
-    const WIDTH: usize = 80;
-    const HEIGHT: usize = 50;
-    const LENGTH: usize = Map::HEIGHT * Map::WIDTH;
+    pub const WIDTH: usize = 80;
+    pub const HEIGHT: usize = 43;
+    pub const LENGTH: usize = Map::HEIGHT * Map::WIDTH;
 
     pub fn xy_idx(&self, x: i32, y: i32) -> usize {
         (y as usize * 80) + x as usize
