@@ -2,8 +2,8 @@ use rltk::{RandomNumberGenerator, RGB};
 use specs::prelude::*;
 
 use crate::components::{
-    BlocksTile, CombatStats, Item, Monster, Name, Player, Position, ProvidesHealing, Renderable,
-    Viewshed,
+    BlocksTile, CombatStats, Consumable, Item, Monster, Name, Player, Position, ProvidesHealing,
+    Renderable, Viewshed,
 };
 use crate::map::Map;
 use crate::rect::Rect;
@@ -173,5 +173,6 @@ fn health_potion(ecs: &mut World, x: i32, y: i32) {
         })
         .with(Item {})
         .with(ProvidesHealing { heal_amount: 8 })
+        .with(Consumable {})
         .build();
 }
