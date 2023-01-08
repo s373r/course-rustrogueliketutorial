@@ -66,7 +66,7 @@ Open http://0.0.0.0:8000/
   - [📝 2.6. Dealing Damage](https://bfnightly.bracketproductions.com/rustbook/chapter_7.html)
   - [📝 2.7. User Interface](https://bfnightly.bracketproductions.com/rustbook/chapter_8.html)
   - [📝 2.8. Items and Inventory](https://bfnightly.bracketproductions.com/rustbook/chapter_9.html)
-  - 🚧 2.9. Ranged Scrolls/Targeting
+  - [📝 2.9. Ranged Scrolls/Targeting](https://bfnightly.bracketproductions.com/rustbook/chapter_10.html)
   - 🚧 2.10. Saving and Loading
   - 🚧 2.11. Delving Deeper
   - 🚧 2.12. Difficulty
