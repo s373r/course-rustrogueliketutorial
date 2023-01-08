@@ -2,7 +2,7 @@ use rltk::{RandomNumberGenerator, RGB};
 use specs::prelude::*;
 
 use crate::components::{
-    BlocksTile, CombatStats, Monster, Name, Player, Position, Renderable, Viewshed,
+    BlocksTile, CombatStats, Item, Monster, Name, Player, Position, Potion, Renderable, Viewshed,
 };
 use crate::map::Map;
 use crate::rect::Rect;
@@ -92,11 +92,13 @@ fn monster<S: ToString>(ecs: &mut World, x: i32, y: i32, glyph: rltk::FontCharTy
 /// Fills a room with stuff!
 pub fn spawn_room(ecs: &mut World, room: &Rect) {
     let mut monster_spawn_points: Vec<usize> = Vec::new();
+    let mut item_spawn_points: Vec<usize> = Vec::new();
 
     // Scope to keep the borrow checker happy
     {
         let mut rng = ecs.write_resource::<RandomNumberGenerator>();
         let num_monsters = rng.roll_dice(1, MAX_MONSTERS + 2) - 3;
+        let num_items = rng.roll_dice(1, MAX_ITEMS + 2) - 3;
 
         for _ in 0..num_monsters {
             let mut added = false;
@@ -112,6 +114,21 @@ pub fn spawn_room(ecs: &mut World, room: &Rect) {
                 }
             }
         }
+
+        for _i in 0..num_items {
+            let mut added = false;
+
+            while !added {
+                let x = (room.x1 + rng.roll_dice(1, i32::abs(room.x2 - room.x1))) as usize;
+                let y = (room.y1 + rng.roll_dice(1, i32::abs(room.y2 - room.y1))) as usize;
+                let idx = (y * Map::WIDTH) + x;
+
+                if !item_spawn_points.contains(&idx) {
+                    item_spawn_points.push(idx);
+                    added = true;
+                }
+            }
+        }
     }
 
     // Actually spawn the monsters
@@ -122,4 +139,28 @@ pub fn spawn_room(ecs: &mut World, room: &Rect) {
 
         random_monster(ecs, x as i32, y as i32);
     }
+
+    // Actually spawn the potions
+    for idx in item_spawn_points.iter() {
+        let x = *idx % Map::WIDTH;
+        let y = *idx / Map::WIDTH;
+
+        health_potion(ecs, x as i32, y as i32);
+    }
+}
+
+fn health_potion(ecs: &mut World, x: i32, y: i32) {
+    ecs.create_entity()
+        .with(Position { x, y })
+        .with(Renderable {
+            glyph: rltk::to_cp437('¡'),
+            fg: RGB::named(rltk::MAGENTA),
+            bg: RGB::named(rltk::BLACK),
+        })
+        .with(Name {
+            name: "Health Potion".to_string(),
+        })
+        .with(Item {})
+        .with(Potion { heal_amount: 8 })
+        .build();
 }
