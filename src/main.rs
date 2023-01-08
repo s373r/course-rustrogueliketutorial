@@ -8,6 +8,7 @@ mod map_indexing_system;
 mod melee_combat_system;
 mod monster_ai_system;
 mod player;
+mod potion_use_system;
 mod rect;
 mod spawner;
 mod visibility_system;
@@ -18,6 +19,7 @@ use crate::gui::draw_ui;
 use crate::inventory_system::ItemCollectionSystem;
 use crate::map_indexing_system::MapIndexingSystem;
 use crate::melee_combat_system::MeleeCombatSystem;
+use crate::potion_use_system::PotionUseSystem;
 use components::*;
 use map::*;
 use monster_ai_system::MonsterAI;
@@ -60,6 +62,9 @@ impl State {
         let mut pickup = ItemCollectionSystem {};
         pickup.run_now(&self.ecs);
 
+        let mut potions = PotionUseSystem {};
+        potions.run_now(&self.ecs);
+
         self.ecs.maintain();
     }
 }
@@ -85,10 +90,26 @@ impl GameState for State {
                 RunState::AwaitingInput
             }
             RunState::ShowInventory => {
-                if gui::show_inventory(self, ctx) == gui::ItemMenuResult::Cancel {
-                    RunState::AwaitingInput
-                } else {
-                    new_run_state
+                let result = gui::show_inventory(self, ctx);
+
+                match result.0 {
+                    gui::ItemMenuResult::Cancel => RunState::AwaitingInput,
+                    gui::ItemMenuResult::NoResponse => new_run_state,
+                    gui::ItemMenuResult::Selected => {
+                        let item_entity = result.1.unwrap();
+                        let mut intent = self.ecs.write_storage::<WantsToDrinkPotion>();
+
+                        intent
+                            .insert(
+                                *self.ecs.fetch::<Entity>(),
+                                WantsToDrinkPotion {
+                                    potion: item_entity,
+                                },
+                            )
+                            .expect("Unable to insert intent");
+
+                        RunState::PlayerTurn
+                    }
                 }
             }
         };
@@ -145,6 +166,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Potion>();
     gs.ecs.register::<InBackpack>();
     gs.ecs.register::<WantsToPickupItem>();
+    gs.ecs.register::<WantsToDrinkPotion>();
 
     gs.ecs.insert(RandomNumberGenerator::new());
 

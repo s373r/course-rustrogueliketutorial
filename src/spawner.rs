@@ -12,6 +12,12 @@ const MAX_ITEMS: i32 = 2;
 
 /// Spawns the player and returns his/her entity object.
 pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
+    // NOTE(DP): debug code
+    health_potion(ecs, player_x - 1, player_y - 1);
+    health_potion(ecs, player_x - 1, player_y + 1);
+    health_potion(ecs, player_x + 1, player_y - 1);
+    health_potion(ecs, player_x + 1, player_y + 1);
+
     ecs.create_entity()
         .with(Position {
             x: player_x,
