@@ -10,6 +10,7 @@ mod monster_ai_system;
 mod player;
 mod potion_use_system;
 mod rect;
+mod render_order;
 mod spawner;
 mod visibility_system;
 
@@ -153,7 +154,11 @@ impl GameState for State {
         let renderables = self.ecs.read_storage::<Renderable>();
         let map = self.ecs.fetch::<Map>();
 
-        for (pos, render) in (&positions, &renderables).join() {
+        let mut data = (&positions, &renderables).join().collect::<Vec<_>>();
+
+        data.sort_by(|(_, left), (_, right)| right.render_order.cmp(&left.render_order));
+
+        for (pos, render) in data.iter() {
             let idx = map.xy_idx(pos.x, pos.y);
 
             if map.visible_tiles[idx] {

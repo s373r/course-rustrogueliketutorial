@@ -6,6 +6,7 @@ use crate::components::{
 };
 use crate::map::Map;
 use crate::rect::Rect;
+use crate::render_order::RenderOrder;
 
 const MAX_MONSTERS: i32 = 4;
 const MAX_ITEMS: i32 = 2;
@@ -27,6 +28,7 @@ pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
             glyph: rltk::to_cp437('@'),
             fg: RGB::named(rltk::YELLOW),
             bg: RGB::named(rltk::BLACK),
+            render_order: RenderOrder::Player,
         })
         .with(Player {})
         .with(Viewshed {
@@ -75,6 +77,7 @@ fn monster<S: ToString>(ecs: &mut World, x: i32, y: i32, glyph: rltk::FontCharTy
             glyph,
             fg: RGB::named(rltk::RED),
             bg: RGB::named(rltk::BLACK),
+            render_order: RenderOrder::Monster,
         })
         .with(Viewshed {
             visible_tiles: Vec::new(),
@@ -162,6 +165,7 @@ fn health_potion(ecs: &mut World, x: i32, y: i32) {
             glyph: rltk::to_cp437('¡'),
             fg: RGB::named(rltk::MAGENTA),
             bg: RGB::named(rltk::BLACK),
+            render_order: RenderOrder::Item,
         })
         .with(Name {
             name: "Health Potion".to_string(),

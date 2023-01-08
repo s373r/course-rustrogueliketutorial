@@ -1,3 +1,4 @@
+use crate::render_order::RenderOrder;
 use rltk::RGB;
 use specs::prelude::*;
 use specs_derive::*;
@@ -13,6 +14,7 @@ pub struct Renderable {
     pub glyph: rltk::FontCharType,
     pub fg: RGB,
     pub bg: RGB,
+    pub render_order: RenderOrder,
 }
 
 #[derive(Component, Debug)]
