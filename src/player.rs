@@ -79,6 +79,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
                 None
             }
             I => return RunState::ShowInventory,
+            F => return RunState::ShowDropItem,
             //
             _ => None,
         },
