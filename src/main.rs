@@ -3,12 +3,12 @@ mod damage_system;
 mod game_log;
 mod gui;
 mod inventory_system;
+mod item_use_system;
 mod map;
 mod map_indexing_system;
 mod melee_combat_system;
 mod monster_ai_system;
 mod player;
-mod potion_use_system;
 mod rect;
 mod render_order;
 mod spawner;
@@ -18,9 +18,9 @@ use crate::damage_system::DamageSystem;
 use crate::game_log::GameLog;
 use crate::gui::draw_ui;
 use crate::inventory_system::{ItemCollectionSystem, ItemDropSystem};
+use crate::item_use_system::ItemUseSystem;
 use crate::map_indexing_system::MapIndexingSystem;
 use crate::melee_combat_system::MeleeCombatSystem;
-use crate::potion_use_system::PotionUseSystem;
 use components::*;
 use map::*;
 use monster_ai_system::MonsterAI;
@@ -64,8 +64,8 @@ impl State {
         let mut pickup = ItemCollectionSystem {};
         pickup.run_now(&self.ecs);
 
-        let mut potions = PotionUseSystem {};
-        potions.run_now(&self.ecs);
+        let mut use_items = ItemUseSystem {};
+        use_items.run_now(&self.ecs);
 
         let mut drop_items = ItemDropSystem {};
         drop_items.run_now(&self.ecs);

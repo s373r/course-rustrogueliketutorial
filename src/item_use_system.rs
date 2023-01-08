@@ -3,9 +3,9 @@ use specs::prelude::*;
 use crate::components::{CombatStats, Name, Potion, WantsToDrinkPotion};
 use crate::game_log::GameLog;
 
-pub struct PotionUseSystem {}
+pub struct ItemUseSystem {}
 
-impl<'a> System<'a> for PotionUseSystem {
+impl<'a> System<'a> for ItemUseSystem {
     #[allow(clippy::type_complexity)]
     type SystemData = (
         ReadExpect<'a, Entity>,
