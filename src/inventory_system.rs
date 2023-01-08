@@ -69,22 +69,10 @@ impl<'a> System<'a> for ItemDropSystem {
         ) = data;
 
         for (entity, to_drop) in (&entities, &wants_drop).join() {
-            // TODO(DP): refactor
-            let mut dropper_pos: Position = Position { x: 0, y: 0 };
-            {
-                let dropped_pos = positions.get(entity).unwrap();
-                dropper_pos.x = dropped_pos.x;
-                dropper_pos.y = dropped_pos.y;
-            }
+            let drop_position = positions.get(entity).unwrap();
 
             positions
-                .insert(
-                    to_drop.item,
-                    Position {
-                        x: dropper_pos.x,
-                        y: dropper_pos.y,
-                    },
-                )
+                .insert(to_drop.item, drop_position.clone())
                 .expect("Unable to insert position");
 
             backpack.remove(to_drop.item);
