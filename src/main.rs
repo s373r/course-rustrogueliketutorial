@@ -2,6 +2,7 @@ mod components;
 mod damage_system;
 mod game_log;
 mod gui;
+mod inventory_system;
 mod map;
 mod map_indexing_system;
 mod melee_combat_system;
@@ -14,6 +15,7 @@ mod visibility_system;
 use crate::damage_system::DamageSystem;
 use crate::game_log::GameLog;
 use crate::gui::draw_ui;
+use crate::inventory_system::ItemCollectionSystem;
 use crate::map_indexing_system::MapIndexingSystem;
 use crate::melee_combat_system::MeleeCombatSystem;
 use components::*;
@@ -53,6 +55,9 @@ impl State {
 
         let mut damage_system = DamageSystem {};
         damage_system.run_now(&self.ecs);
+
+        let mut pickup = ItemCollectionSystem {};
+        pickup.run_now(&self.ecs);
 
         self.ecs.maintain();
     }
@@ -130,6 +135,8 @@ fn main() -> rltk::BError {
     gs.ecs.register::<SufferDamage>();
     gs.ecs.register::<Item>();
     gs.ecs.register::<Potion>();
+    gs.ecs.register::<InBackpack>();
+    gs.ecs.register::<WantsToPickupItem>();
 
     gs.ecs.insert(RandomNumberGenerator::new());
 
