@@ -60,10 +60,10 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
 }
 
 pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
-    let optional_player_movement = {
-        use VirtualKeyCode::*;
+    use VirtualKeyCode::*;
 
-        ctx.key.and_then(|key| match key {
+    let optional_player_movement = match ctx.key {
+        Some(key) => match key {
             Left | H | A => Some((-1, 0)),
             Right | L | D => Some((1, 0)),
             Up | K | W => Some((0, -1)),
@@ -78,9 +78,11 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
                 get_item(&mut gs.ecs);
                 None
             }
+            I => return RunState::ShowInventory,
             //
             _ => None,
-        })
+        },
+        None => None,
     };
 
     if let Some((delta_x, delta_y)) = optional_player_movement {

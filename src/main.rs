@@ -33,6 +33,7 @@ pub enum RunState {
     PreRun,
     PlayerTurn,
     MonsterTurn,
+    ShowInventory,
 }
 
 pub struct State {
@@ -82,6 +83,13 @@ impl GameState for State {
             RunState::MonsterTurn => {
                 self.run_systems();
                 RunState::AwaitingInput
+            }
+            RunState::ShowInventory => {
+                if gui::show_inventory(self, ctx) == gui::ItemMenuResult::Cancel {
+                    RunState::AwaitingInput
+                } else {
+                    new_run_state
+                }
             }
         };
 
