@@ -76,7 +76,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             //
             G => {
                 get_item(&mut gs.ecs);
-                None
+                return RunState::PlayerTurn;
             }
             I => return RunState::ShowInventory,
             F => return RunState::ShowDropItem,
