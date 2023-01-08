@@ -31,7 +31,6 @@ impl<'a> System<'a> for PotionUseSystem {
         for (entity, drink, stats) in (&entities, &wants_drink, &mut combat_stats).join() {
             let potion = potions.get(drink.potion);
 
-            // TODO(DP): use Option::is_some()
             match potion {
                 None => {}
                 Some(potion) => {
