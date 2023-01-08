@@ -109,11 +109,12 @@ impl GameState for State {
 fn main() -> rltk::BError {
     use rltk::RltkBuilder;
 
-    let mut context = RltkBuilder::simple80x50()
+    let context = RltkBuilder::simple80x50()
         .with_title("Roguelike Tutorial")
         .build()?;
 
-    context.with_post_scanlines(true);
+    // NOTE(DP): disable the scan lines effect
+    // context.with_post_scanlines(true);
 
     let mut gs = State { ecs: World::new() };
 
