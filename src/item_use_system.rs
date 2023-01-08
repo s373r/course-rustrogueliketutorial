@@ -1,6 +1,6 @@
 use specs::prelude::*;
 
-use crate::components::{CombatStats, Consumable, Name, Potion, WantsToDrinkPotion};
+use crate::components::{CombatStats, Consumable, Name, ProvidesHealing, WantsToDrinkPotion};
 use crate::game_log::GameLog;
 
 pub struct ItemUseSystem {}
@@ -13,7 +13,7 @@ impl<'a> System<'a> for ItemUseSystem {
         Entities<'a>,
         WriteStorage<'a, WantsToDrinkPotion>,
         ReadStorage<'a, Name>,
-        ReadStorage<'a, Potion>,
+        ReadStorage<'a, ProvidesHealing>,
         WriteStorage<'a, CombatStats>,
         ReadStorage<'a, Consumable>,
     );
@@ -25,33 +25,30 @@ impl<'a> System<'a> for ItemUseSystem {
             entities,
             mut wants_drink,
             names,
-            potions,
+            healings,
             mut combat_stats,
             consumables,
         ) = data;
 
-        for (entity, drink, stats) in (&entities, &wants_drink, &mut combat_stats).join() {
-            let potion = potions.get(drink.potion);
+        for (entity, use_item, stats) in (&entities, &wants_drink, &mut combat_stats).join() {
+            let heal_item = healings.get(use_item.potion);
 
-            match potion {
-                None => {}
-                Some(potion) => {
-                    stats.hp = i32::min(stats.max_hp, stats.hp + potion.heal_amount);
+            if let Some(heal_item) = heal_item {
+                stats.hp = i32::min(stats.max_hp, stats.hp + heal_item.heal_amount);
 
-                    if entity == *player_entity {
-                        game_log.entries.push(format!(
-                            "You drink the {}, healing {} hp.",
-                            names.get(drink.potion).unwrap().name,
-                            potion.heal_amount
-                        ));
-                    }
+                if entity == *player_entity {
+                    game_log.entries.push(format!(
+                        "You drink the {}, healing {} hp.",
+                        names.get(use_item.potion).unwrap().name,
+                        heal_item.heal_amount
+                    ));
                 }
             }
 
-            let consumable = consumables.get(drink.potion);
+            let consumable = consumables.get(use_item.potion);
 
             if consumable.is_some() {
-                entities.delete(drink.potion).expect("Delete failed");
+                entities.delete(use_item.potion).expect("Delete failed");
             }
         }
 
