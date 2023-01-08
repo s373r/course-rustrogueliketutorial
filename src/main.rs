@@ -199,6 +199,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<WantsToPickupItem>();
     gs.ecs.register::<WantsToDrinkPotion>();
     gs.ecs.register::<WantsToDropItem>();
+    gs.ecs.register::<Consumable>();
 
     gs.ecs.insert(RandomNumberGenerator::new());
 

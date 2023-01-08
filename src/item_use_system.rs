@@ -1,6 +1,6 @@
 use specs::prelude::*;
 
-use crate::components::{CombatStats, Name, Potion, WantsToDrinkPotion};
+use crate::components::{CombatStats, Consumable, Name, Potion, WantsToDrinkPotion};
 use crate::game_log::GameLog;
 
 pub struct ItemUseSystem {}
@@ -15,6 +15,7 @@ impl<'a> System<'a> for ItemUseSystem {
         ReadStorage<'a, Name>,
         ReadStorage<'a, Potion>,
         WriteStorage<'a, CombatStats>,
+        ReadStorage<'a, Consumable>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
@@ -26,6 +27,7 @@ impl<'a> System<'a> for ItemUseSystem {
             names,
             potions,
             mut combat_stats,
+            consumables,
         ) = data;
 
         for (entity, drink, stats) in (&entities, &wants_drink, &mut combat_stats).join() {
@@ -43,9 +45,13 @@ impl<'a> System<'a> for ItemUseSystem {
                             potion.heal_amount
                         ));
                     }
-
-                    entities.delete(drink.potion).expect("Delete failed");
                 }
+            }
+
+            let consumable = consumables.get(drink.potion);
+
+            if consumable.is_some() {
+                entities.delete(drink.potion).expect("Delete failed");
             }
         }
 
