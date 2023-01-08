@@ -8,6 +8,7 @@ resolver = "2"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+num-integer = "0.1"
 # NOTE(DP): Build fix (2022-01-03)
 #           https://github.com/amethyst/bracket-lib/issues/318#issuecomment-1359687927
 rltk = {version="~0.8", features=["webgpu"], default-features=false }

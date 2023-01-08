@@ -1574,6 +1574,7 @@ dependencies = [
 name = "roguelike-tutorial"
 version = "0.1.0"
 dependencies = [
+ "num-integer",
  "rltk",
  "specs",
  "specs-derive",
