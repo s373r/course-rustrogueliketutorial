@@ -21,7 +21,7 @@ use map::*;
 use monster_ai_system::MonsterAI;
 use player::*;
 use rect::*;
-use rltk::{GameState, Point, RandomNumberGenerator, Rltk, RGB};
+use rltk::{GameState, Point, RandomNumberGenerator, Rltk};
 use specs::prelude::*;
 use visibility_system::*;
 
