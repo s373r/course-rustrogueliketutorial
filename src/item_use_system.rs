@@ -21,6 +21,7 @@ impl<'a> System<'a> for ItemUseSystem {
         WriteStorage<'a, SufferDamage>,
         ReadStorage<'a, Consumable>,
         ReadStorage<'a, AreaOfEffect>,
+        WriteStorage<'a, Confusion>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
@@ -29,7 +30,7 @@ impl<'a> System<'a> for ItemUseSystem {
             mut game_log,
             map,
             entities,
-            mut wants_drink,
+            mut wants_use_item,
             names,
             healings,
             inflict_damage,
@@ -37,9 +38,10 @@ impl<'a> System<'a> for ItemUseSystem {
             mut suffer_damage,
             consumables,
             aoe,
+            mut confused,
         ) = data;
 
-        for (entity, use_item) in (&entities, &wants_drink).join() {
+        for (entity, use_item) in (&entities, &wants_use_item).join() {
             let mut used_item = true;
 
             // Targeting
@@ -118,13 +120,44 @@ impl<'a> System<'a> for ItemUseSystem {
                 }
             }
 
-            let consumable = consumables.get(use_item.item);
+            // Can it pass along confusion? Note the use of scopes to escape from the borrow checker!
+            let mut add_confusion = Vec::new();
+            {
+                let causes_confusion = confused.get(use_item.item);
 
-            if used_item && consumable.is_some() {
-                entities.delete(use_item.item).expect("Delete failed");
+                if let Some(confusion) = causes_confusion {
+                    used_item = false;
+
+                    for mob in targets.iter() {
+                        add_confusion.push((*mob, confusion.turns));
+
+                        if entity == *player_entity {
+                            let mob_name = names.get(*mob).unwrap();
+                            let item_name = names.get(use_item.item).unwrap();
+
+                            game_log.entries.push(format!(
+                                "You use {} on {}, confusing them.",
+                                item_name.name, mob_name.name
+                            ));
+                        }
+                    }
+                }
+            }
+            for mob in add_confusion.iter() {
+                confused
+                    .insert(mob.0, Confusion { turns: mob.1 })
+                    .expect("Unable to insert status");
+            }
+
+            if used_item {
+                let consumable = consumables.get(use_item.item);
+
+                if consumable.is_some() {
+                    entities.delete(use_item.item).expect("Delete failed");
+                }
             }
         }
 
-        wants_drink.clear();
+        wants_use_item.clear();
     }
 }
