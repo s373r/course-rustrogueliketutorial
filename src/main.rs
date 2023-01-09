@@ -78,6 +78,29 @@ impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
         ctx.cls();
 
+        draw_map(&self.ecs, ctx);
+
+        {
+            let positions = self.ecs.read_storage::<Position>();
+            let renderables = self.ecs.read_storage::<Renderable>();
+            let map = self.ecs.fetch::<Map>();
+
+            let mut positional_renderables = (&positions, &renderables).join().collect::<Vec<_>>();
+
+            positional_renderables
+                .sort_by(|(_, left), (_, right)| right.render_order.cmp(&left.render_order));
+
+            for (pos, render) in positional_renderables.iter() {
+                let idx = map.xy_idx(pos.x, pos.y);
+
+                if map.visible_tiles[idx] {
+                    ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph)
+                }
+            }
+
+            draw_ui(&self.ecs, ctx)
+        }
+
         let mut new_run_state = *self.ecs.fetch::<RunState>();
 
         new_run_state = match new_run_state {
@@ -147,27 +170,6 @@ impl GameState for State {
         }
 
         damage_system::delete_the_dead(&mut self.ecs);
-
-        draw_map(&self.ecs, ctx);
-
-        let positions = self.ecs.read_storage::<Position>();
-        let renderables = self.ecs.read_storage::<Renderable>();
-        let map = self.ecs.fetch::<Map>();
-
-        let mut positional_renderables = (&positions, &renderables).join().collect::<Vec<_>>();
-
-        positional_renderables
-            .sort_by(|(_, left), (_, right)| right.render_order.cmp(&left.render_order));
-
-        for (pos, render) in positional_renderables.iter() {
-            let idx = map.xy_idx(pos.x, pos.y);
-
-            if map.visible_tiles[idx] {
-                ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph)
-            }
-        }
-
-        draw_ui(&self.ecs, ctx)
     }
 }
 
