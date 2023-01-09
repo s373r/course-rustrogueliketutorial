@@ -11,11 +11,12 @@ const MAX_ITEMS: i32 = 2;
 
 /// Spawns the player and returns his/her entity object.
 pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
-    // NOTE(DP): debug code
+    // NOTE(DP): debug code -->
     health_potion(ecs, player_x - 1, player_y - 1);
-    health_potion(ecs, player_x - 1, player_y + 1);
+    fireball_scroll(ecs, player_x - 1, player_y + 1);
     magic_missile_scroll(ecs, player_x + 1, player_y - 1);
     magic_missile_scroll(ecs, player_x + 1, player_y + 1);
+    // <--
 
     ecs.create_entity()
         .with(Position {
@@ -196,11 +197,32 @@ fn random_item(ecs: &mut World, x: i32, y: i32) {
     let roll = {
         let mut rng = ecs.write_resource::<RandomNumberGenerator>();
 
-        rng.roll_dice(1, 2)
+        rng.roll_dice(1, 3)
     };
 
     match roll {
         1 => health_potion(ecs, x, y),
+        2 => fireball_scroll(ecs, x, y),
         _ => magic_missile_scroll(ecs, x, y),
     }
+}
+
+fn fireball_scroll(ecs: &mut World, x: i32, y: i32) {
+    ecs.create_entity()
+        .with(Position { x, y })
+        .with(Renderable {
+            glyph: rltk::to_cp437(')'),
+            fg: RGB::named(rltk::ORANGE),
+            bg: RGB::named(rltk::BLACK),
+            render_order: RenderOrder::Item,
+        })
+        .with(Name {
+            name: "Fireball Scroll".to_string(),
+        })
+        .with(Item {})
+        .with(Consumable {})
+        .with(Ranged { range: 6 })
+        .with(InflictsDamage { damage: 20 })
+        .with(AreaOfEffect { radius: 3 })
+        .build();
 }

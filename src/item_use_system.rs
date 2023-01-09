@@ -1,8 +1,6 @@
 use specs::prelude::*;
 
-use crate::components::{
-    CombatStats, Consumable, InflictsDamage, Name, ProvidesHealing, SufferDamage, WantsToUseItem,
-};
+use crate::components::*;
 use crate::game_log::GameLog;
 use crate::map::Map;
 
@@ -22,6 +20,7 @@ impl<'a> System<'a> for ItemUseSystem {
         WriteStorage<'a, CombatStats>,
         WriteStorage<'a, SufferDamage>,
         ReadStorage<'a, Consumable>,
+        ReadStorage<'a, AreaOfEffect>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
@@ -37,21 +36,62 @@ impl<'a> System<'a> for ItemUseSystem {
             mut combat_stats,
             mut suffer_damage,
             consumables,
+            aoe,
         ) = data;
 
-        for (entity, use_item, stats) in (&entities, &wants_drink, &mut combat_stats).join() {
+        for (entity, use_item) in (&entities, &wants_drink).join() {
             let mut used_item = true;
+
+            // Targeting
+            let mut targets = Vec::<Entity>::new();
+
+            if let Some(target) = use_item.target {
+                let area_effect = aoe.get(use_item.item);
+
+                if let Some(area_effect) = area_effect {
+                    // AoE
+                    let mut blast_tiles = rltk::field_of_view(target, area_effect.radius, &*map);
+
+                    blast_tiles.retain(|p| {
+                        p.x > 0 && p.x < map.width - 1 && p.y > 0 && p.y < map.height - 1
+                    });
+
+                    for tile_idx in blast_tiles.iter() {
+                        let idx = map.xy_idx(tile_idx.x, tile_idx.y);
+
+                        for mob in map.tile_content[idx].iter() {
+                            targets.push(*mob);
+                        }
+                    }
+                } else {
+                    // Single target in tile
+                    let idx = map.xy_idx(target.x, target.y);
+
+                    for mob in map.tile_content[idx].iter() {
+                        targets.push(*mob);
+                    }
+                }
+            } else {
+                targets.push(*player_entity);
+            }
+
             let heal_item = healings.get(use_item.item);
 
             if let Some(heal_item) = heal_item {
-                stats.hp = i32::min(stats.max_hp, stats.hp + heal_item.heal_amount);
+                for target in targets.iter() {
+                    let stats = combat_stats.get_mut(*target);
 
-                if entity == *player_entity {
-                    game_log.entries.push(format!(
-                        "You drink the {}, healing {} hp.",
-                        names.get(use_item.item).unwrap().name,
-                        heal_item.heal_amount
-                    ));
+                    if let Some(stats) = stats {
+                        stats.hp = i32::min(stats.max_hp, stats.hp + heal_item.heal_amount);
+
+                        if entity == *player_entity {
+                            game_log.entries.push(format!(
+                                "You drink the {}, healing {} hp.",
+                                names.get(use_item.item).unwrap().name,
+                                heal_item.heal_amount
+                            ));
+                        }
+                    }
                 }
             }
 
@@ -61,10 +101,7 @@ impl<'a> System<'a> for ItemUseSystem {
             if let Some(damage) = item_damages {
                 used_item = false;
 
-                let target_point = use_item.target.unwrap();
-                let idx = map.xy_idx(target_point.x, target_point.y);
-
-                for mob in map.tile_content[idx].iter() {
+                for mob in targets.iter() {
                     SufferDamage::new_damage(&mut suffer_damage, *mob, damage.damage);
 
                     if entity == *player_entity {

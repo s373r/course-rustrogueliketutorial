@@ -23,7 +23,7 @@ pub struct Player {}
 
 #[derive(Component)]
 pub struct Viewshed {
-    pub visible_tiles: Vec<rltk::Point>,
+    pub visible_tiles: Vec<Point>,
     pub range: i32,
     pub dirty: bool,
 }
@@ -111,4 +111,9 @@ pub struct Ranged {
 #[derive(Component, Debug)]
 pub struct InflictsDamage {
     pub damage: i32,
+}
+
+#[derive(Component, Debug)]
+pub struct AreaOfEffect {
+    pub radius: i32,
 }
