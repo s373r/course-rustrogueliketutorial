@@ -1,7 +1,8 @@
-use crate::render_order::RenderOrder;
-use rltk::RGB;
+use rltk::{Point, RGB};
 use specs::prelude::*;
 use specs_derive::*;
+
+use crate::render_order::RenderOrder;
 
 #[derive(Component, Clone)]
 pub struct Position {
@@ -91,6 +92,7 @@ pub struct WantsToPickupItem {
 #[derive(Component, Debug)]
 pub struct WantsToUseItem {
     pub item: Entity,
+    pub target: Option<Point>,
 }
 
 #[derive(Component, Debug, Clone)]
