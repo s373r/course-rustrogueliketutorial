@@ -1,6 +1,6 @@
 use specs::prelude::*;
 
-use crate::components::{CombatStats, Consumable, Name, ProvidesHealing, WantsToDrinkPotion};
+use crate::components::{CombatStats, Consumable, Name, ProvidesHealing, WantsToUseItem};
 use crate::game_log::GameLog;
 
 pub struct ItemUseSystem {}
@@ -11,7 +11,7 @@ impl<'a> System<'a> for ItemUseSystem {
         ReadExpect<'a, Entity>,
         WriteExpect<'a, GameLog>,
         Entities<'a>,
-        WriteStorage<'a, WantsToDrinkPotion>,
+        WriteStorage<'a, WantsToUseItem>,
         ReadStorage<'a, Name>,
         ReadStorage<'a, ProvidesHealing>,
         WriteStorage<'a, CombatStats>,
@@ -31,7 +31,7 @@ impl<'a> System<'a> for ItemUseSystem {
         ) = data;
 
         for (entity, use_item, stats) in (&entities, &wants_drink, &mut combat_stats).join() {
-            let heal_item = healings.get(use_item.potion);
+            let heal_item = healings.get(use_item.item);
 
             if let Some(heal_item) = heal_item {
                 stats.hp = i32::min(stats.max_hp, stats.hp + heal_item.heal_amount);
@@ -39,16 +39,16 @@ impl<'a> System<'a> for ItemUseSystem {
                 if entity == *player_entity {
                     game_log.entries.push(format!(
                         "You drink the {}, healing {} hp.",
-                        names.get(use_item.potion).unwrap().name,
+                        names.get(use_item.item).unwrap().name,
                         heal_item.heal_amount
                     ));
                 }
             }
 
-            let consumable = consumables.get(use_item.potion);
+            let consumable = consumables.get(use_item.item);
 
             if consumable.is_some() {
-                entities.delete(use_item.potion).expect("Delete failed");
+                entities.delete(use_item.item).expect("Delete failed");
             }
         }
 
