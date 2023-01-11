@@ -7,6 +7,7 @@ mod item_use_system;
 mod map;
 mod map_indexing_system;
 mod melee_combat_system;
+mod menu;
 mod monster_ai_system;
 mod player;
 mod rect;
@@ -16,7 +17,6 @@ mod visibility_system;
 
 use crate::damage_system::DamageSystem;
 use crate::game_log::GameLog;
-use crate::gui::draw_ui;
 use crate::inventory_system::{ItemCollectionSystem, ItemDropSystem};
 use crate::item_use_system::ItemUseSystem;
 use crate::map_indexing_system::MapIndexingSystem;
@@ -38,7 +38,13 @@ pub enum RunState {
     MonsterTurn,
     ShowInventory,
     ShowDropItem,
-    ShowTargeting { range: i32, item: Entity },
+    ShowTargeting {
+        range: i32,
+        item: Entity,
+    },
+    MainMenu {
+        menu_selection: gui::MainMenuSelection,
+    },
 }
 
 pub struct State {
@@ -79,30 +85,34 @@ impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
         ctx.cls();
 
-        draw_map(&self.ecs, ctx);
-
-        {
-            let positions = self.ecs.read_storage::<Position>();
-            let renderables = self.ecs.read_storage::<Renderable>();
-            let map = self.ecs.fetch::<Map>();
-
-            let mut positional_renderables = (&positions, &renderables).join().collect::<Vec<_>>();
-
-            positional_renderables
-                .sort_by(|(_, left), (_, right)| right.render_order.cmp(&left.render_order));
-
-            for (pos, render) in positional_renderables.iter() {
-                let idx = map.xy_idx(pos.x, pos.y);
-
-                if map.visible_tiles[idx] {
-                    ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph)
-                }
-            }
-
-            draw_ui(&self.ecs, ctx)
-        }
-
         let mut new_run_state = *self.ecs.fetch::<RunState>();
+
+        match new_run_state {
+            RunState::MainMenu { .. } => {}
+            _ => {
+                draw_map(&self.ecs, ctx);
+
+                let positions = self.ecs.read_storage::<Position>();
+                let renderables = self.ecs.read_storage::<Renderable>();
+                let map = self.ecs.fetch::<Map>();
+
+                let mut positional_renderables =
+                    (&positions, &renderables).join().collect::<Vec<_>>();
+
+                positional_renderables
+                    .sort_by(|(_, left), (_, right)| right.render_order.cmp(&left.render_order));
+
+                for (pos, render) in positional_renderables.iter() {
+                    let idx = map.xy_idx(pos.x, pos.y);
+
+                    if map.visible_tiles[idx] {
+                        ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph)
+                    }
+                }
+
+                gui::draw_ui(&self.ecs, ctx)
+            }
+        }
 
         new_run_state = match new_run_state {
             RunState::PreRun => {
@@ -196,6 +206,20 @@ impl GameState for State {
                     }
                 }
             }
+            RunState::MainMenu { .. } => {
+                let result = menu::main_menu(self, ctx);
+
+                match result {
+                    gui::MainMenuResult::NoSelection { selected } => RunState::MainMenu {
+                        menu_selection: selected,
+                    },
+                    gui::MainMenuResult::Selected { selected } => match selected {
+                        gui::MainMenuSelection::NewGame => RunState::PreRun,
+                        gui::MainMenuSelection::LoadGame => RunState::PreRun,
+                        gui::MainMenuSelection::Quit => std::process::exit(0),
+                    },
+                }
+            }
         };
 
         {
@@ -258,7 +282,9 @@ fn main() -> rltk::BError {
     let player_entity = spawner::player(&mut gs.ecs, player_x, player_y);
 
     gs.ecs.insert(player_entity);
-    gs.ecs.insert(RunState::PreRun);
+    gs.ecs.insert(RunState::MainMenu {
+        menu_selection: gui::MainMenuSelection::NewGame,
+    });
     gs.ecs.insert(GameLog {
         entries: vec!["Welcome to Rusty Roguelike".to_string()],
     });
