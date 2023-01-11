@@ -90,6 +90,8 @@ impl State {
         let player = self.ecs.read_storage::<Player>();
         let backpack = self.ecs.read_storage::<InBackpack>();
         let player_entity = self.ecs.fetch::<Entity>();
+        let equipped = self.ecs.read_storage::<Equipped>();
+
         let mut to_delete = Vec::new();
 
         for entity in entities.join() {
@@ -106,6 +108,12 @@ impl State {
             let entity_backpack = backpack.get(entity);
 
             if let Some(InBackpack { owner }) = entity_backpack {
+                if *owner == *player_entity {
+                    should_delete = false;
+                }
+            }
+
+            if let Some(Equipped { owner, .. }) = equipped.get(entity) {
                 if *owner == *player_entity {
                     should_delete = false;
                 }
