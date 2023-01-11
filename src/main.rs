@@ -12,6 +12,7 @@ mod monster_ai_system;
 mod player;
 mod rect;
 mod render_order;
+mod saveload_system;
 mod spawner;
 mod visibility_system;
 
@@ -223,9 +224,7 @@ impl GameState for State {
                 }
             }
             RunState::SaveGame => {
-                let data = serde_json::to_string(&*self.ecs.fetch::<Map>()).unwrap();
-
-                println!("data: {data}");
+                saveload_system::save_game(&mut self.ecs);
 
                 RunState::MainMenu {
                     menu_selection: gui::MainMenuSelection::LoadGame,
@@ -277,7 +276,9 @@ fn main() -> rltk::BError {
     gs.ecs.register::<AreaOfEffect>();
     gs.ecs.register::<Confusion>();
     gs.ecs.register::<SimpleMarker<SerializeMe>>();
+    gs.ecs.register::<SerializationHelper>();
 
+    gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
     gs.ecs.insert(RandomNumberGenerator::new());
 
     let map = Map::new_map_rooms_and_corridors();
@@ -301,7 +302,6 @@ fn main() -> rltk::BError {
         entries: vec!["Welcome to Rusty Roguelike".to_string()],
     });
     gs.ecs.insert(RandomNumberGenerator::new());
-    gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
 
     rltk::main_loop(context, gs)
 }
