@@ -90,6 +90,8 @@ pub fn save_game(ecs: &mut World) {
             SerializationHelper,
             Equippable,
             Equipped,
+            MeleePowerBonus,
+            DefenseBonus
         );
     }
 
@@ -153,7 +155,9 @@ pub fn load_game(ecs: &mut World) {
             WantsToDropItem,
             SerializationHelper,
             Equippable,
-            Equipped
+            Equipped,
+            MeleePowerBonus,
+            DefenseBonus
         );
     }
 
