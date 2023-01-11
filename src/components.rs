@@ -149,3 +149,9 @@ pub enum EquipmentSlot {
 pub struct Equippable {
     pub slot: EquipmentSlot,
 }
+
+#[derive(Component, ConvertSaveload, Clone)]
+pub struct Equipped {
+    pub owner: Entity,
+    pub slot: EquipmentSlot,
+}
