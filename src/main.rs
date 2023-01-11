@@ -51,6 +51,7 @@ pub enum RunState {
     SaveGame,
     NextLevel,
     ShowRemoveItem,
+    GameOver,
 }
 
 pub struct State {
@@ -191,6 +192,55 @@ impl State {
 
         if let Some(player_health) = player_health {
             player_health.hp = i32::max(player_health.hp, player_health.max_hp / 2);
+        }
+    }
+
+    fn game_over_cleanup(&mut self) {
+        // Delete everything
+        let mut to_delete = Vec::new();
+        for e in self.ecs.entities().join() {
+            to_delete.push(e);
+        }
+        for del in to_delete.iter() {
+            self.ecs.delete_entity(*del).expect("Deletion failed");
+        }
+
+        // Build a new map and place the player
+        let map = {
+            let mut map_resource = self.ecs.write_resource::<Map>();
+
+            *map_resource = Map::new_map_rooms_and_corridors(1);
+
+            map_resource.clone()
+        };
+
+        // Spawn bad guys
+        for room in map.rooms.iter().skip(1) {
+            spawner::spawn_room(&mut self.ecs, room, 1);
+        }
+
+        // Place the player and update resources
+        let (player_x, player_y) = map.rooms.first().unwrap().center();
+        let player_entity = spawner::player(&mut self.ecs, player_x, player_y);
+        let mut player_position = self.ecs.write_resource::<Point>();
+        *player_position = Point::new(player_x, player_y);
+        let mut position_components = self.ecs.write_storage::<Position>();
+        let mut player_entity_writer = self.ecs.write_resource::<Entity>();
+
+        *player_entity_writer = player_entity;
+
+        let player_pos_comp = position_components.get_mut(player_entity);
+
+        if let Some(player_pos_comp) = player_pos_comp {
+            player_pos_comp.x = player_x;
+            player_pos_comp.y = player_y;
+        }
+
+        // Mark the player's visibility as dirty
+        let mut viewshed_components = self.ecs.write_storage::<Viewshed>();
+        let vs = viewshed_components.get_mut(player_entity);
+        if let Some(vs) = vs {
+            vs.dirty = true;
         }
     }
 }
@@ -368,6 +418,19 @@ impl GameState for State {
                             .expect("Unable to insert intent");
 
                         RunState::PlayerTurn
+                    }
+                }
+            }
+            RunState::GameOver => {
+                let result = gui::game_over(ctx);
+                match result {
+                    gui::GameOverResult::NoSelection => new_run_state,
+                    gui::GameOverResult::QuitToMenu => {
+                        self.game_over_cleanup();
+
+                        RunState::MainMenu {
+                            menu_selection: gui::MainMenuSelection::NewGame,
+                        }
                     }
                 }
             }
