@@ -15,19 +15,21 @@ mod render_order;
 mod spawner;
 mod visibility_system;
 
+use rltk::{GameState, Point, RandomNumberGenerator, Rltk};
+use specs::prelude::*;
+use specs::saveload::{SimpleMarker, SimpleMarkerAllocator};
+
+use crate::components::*;
 use crate::damage_system::DamageSystem;
 use crate::game_log::GameLog;
 use crate::inventory_system::{ItemCollectionSystem, ItemDropSystem};
 use crate::item_use_system::ItemUseSystem;
+use crate::map::*;
 use crate::map_indexing_system::MapIndexingSystem;
 use crate::melee_combat_system::MeleeCombatSystem;
-use components::*;
-use map::*;
-use monster_ai_system::MonsterAI;
-use player::*;
-use rltk::{GameState, Point, RandomNumberGenerator, Rltk};
-use specs::prelude::*;
-use visibility_system::*;
+use crate::monster_ai_system::MonsterAI;
+use crate::player::*;
+use crate::visibility_system::*;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum RunState {
@@ -274,6 +276,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<InflictsDamage>();
     gs.ecs.register::<AreaOfEffect>();
     gs.ecs.register::<Confusion>();
+    gs.ecs.register::<SimpleMarker<SerializeMe>>();
 
     gs.ecs.insert(RandomNumberGenerator::new());
 
@@ -298,6 +301,7 @@ fn main() -> rltk::BError {
         entries: vec!["Welcome to Rusty Roguelike".to_string()],
     });
     gs.ecs.insert(RandomNumberGenerator::new());
+    gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
 
     rltk::main_loop(context, gs)
 }
