@@ -25,7 +25,6 @@ use components::*;
 use map::*;
 use monster_ai_system::MonsterAI;
 use player::*;
-use rect::*;
 use rltk::{GameState, Point, RandomNumberGenerator, Rltk};
 use specs::prelude::*;
 use visibility_system::*;
@@ -221,9 +220,15 @@ impl GameState for State {
                     },
                 }
             }
-            RunState::SaveGame => RunState::MainMenu {
-                menu_selection: gui::MainMenuSelection::LoadGame,
-            },
+            RunState::SaveGame => {
+                let data = serde_json::to_string(&*self.ecs.fetch::<Map>()).unwrap();
+
+                println!("data: {data}");
+
+                RunState::MainMenu {
+                    menu_selection: gui::MainMenuSelection::LoadGame,
+                }
+            }
         };
 
         {
