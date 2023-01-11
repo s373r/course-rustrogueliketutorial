@@ -70,7 +70,7 @@ Open http://0.0.0.0:8000/
   - [📝 2.10. Saving and Loading](https://bfnightly.bracketproductions.com/rustbook/chapter_11.html)
   - [📝 2.11. Delving Deeper](https://bfnightly.bracketproductions.com/rustbook/chapter_12.html)
   - [📝 2.12. Difficulty](https://bfnightly.bracketproductions.com/rustbook/chapter_13.html)
-  - 🚧 2.13. Equipment
+  - [📝 2.13. Equipment](https://bfnightly.bracketproductions.com/rustbook/chapter_14.html)
 - 🚧 3. Section 2 - Stretch Goals
   - 🚧 3.1. Nice Walls with Bitsets
   - 🚧 3.2. Bloodstains
