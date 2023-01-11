@@ -172,3 +172,9 @@ pub fn load_game(ecs: &mut World) {
     ecs.delete_entity(deleteme.unwrap())
         .expect("Unable to delete helper");
 }
+
+pub fn delete_save() {
+    if Path::new(SAVE_FILE).exists() {
+        fs::remove_file(SAVE_FILE).expect("Unable to delete file");
+    }
+}
