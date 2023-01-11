@@ -285,7 +285,7 @@ fn main() -> rltk::BError {
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
     gs.ecs.insert(RandomNumberGenerator::new());
 
-    let map = Map::new_map_rooms_and_corridors();
+    let map = Map::new_map_rooms_and_corridors(1);
 
     for room in map.rooms.iter().skip(1) {
         spawner::spawn_room(&mut gs.ecs, room);
