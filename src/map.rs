@@ -9,6 +9,7 @@ use crate::rect::Rect;
 pub enum TileType {
     Wall,
     Floor,
+    DownStairs,
 }
 
 #[derive(Default, Serialize, Deserialize, Clone)]
@@ -113,6 +114,11 @@ impl Map {
             }
         }
 
+        let stairs_position = map.rooms.last().unwrap().center();
+        let stairs_idx = map.xy_idx(stairs_position.0, stairs_position.1);
+
+        map.tiles[stairs_idx] = TileType::DownStairs;
+
         map
     }
 
@@ -207,6 +213,7 @@ pub fn draw_map(ecs: &World, ctx: &mut Rltk) {
             let (glyph, mut fg) = match tile {
                 TileType::Floor => (rltk::to_cp437('.'), RGB::from_f32(0.0, 0.5, 0.5)),
                 TileType::Wall => (rltk::to_cp437('#'), RGB::from_f32(0., 1.0, 0.)),
+                TileType::DownStairs => (rltk::to_cp437('>'), RGB::from_f32(0., 1.0, 1.0)),
             };
 
             if !map.visible_tiles[idx] {
