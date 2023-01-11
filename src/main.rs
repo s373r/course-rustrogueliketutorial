@@ -24,7 +24,7 @@ use specs::saveload::{SimpleMarker, SimpleMarkerAllocator};
 use crate::components::*;
 use crate::damage_system::DamageSystem;
 use crate::game_log::GameLog;
-use crate::inventory_system::{ItemCollectionSystem, ItemDropSystem};
+use crate::inventory_system::{ItemCollectionSystem, ItemDropSystem, ItemRemoveSystem};
 use crate::item_use_system::ItemUseSystem;
 use crate::map::*;
 use crate::map_indexing_system::MapIndexingSystem;
@@ -50,6 +50,7 @@ pub enum RunState {
     },
     SaveGame,
     NextLevel,
+    ShowRemoveItem,
 }
 
 pub struct State {
@@ -81,6 +82,9 @@ impl State {
 
         let mut drop_items = ItemDropSystem {};
         drop_items.run_now(&self.ecs);
+
+        let mut item_remove = ItemRemoveSystem {};
+        item_remove.run_now(&self.ecs);
 
         self.ecs.maintain();
     }
@@ -346,6 +350,27 @@ impl GameState for State {
 
                 RunState::PreRun
             }
+            RunState::ShowRemoveItem => {
+                let result = gui::remove_item_menu(self, ctx);
+
+                match result.0 {
+                    gui::ItemMenuResult::Cancel => RunState::AwaitingInput,
+                    gui::ItemMenuResult::NoResponse => new_run_state,
+                    gui::ItemMenuResult::Selected => {
+                        let item_entity = result.1.unwrap();
+                        let mut intent = self.ecs.write_storage::<WantsToRemoveItem>();
+
+                        intent
+                            .insert(
+                                *self.ecs.fetch::<Entity>(),
+                                WantsToRemoveItem { item: item_entity },
+                            )
+                            .expect("Unable to insert intent");
+
+                        RunState::PlayerTurn
+                    }
+                }
+            }
         };
 
         {
@@ -397,6 +422,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Equipped>();
     gs.ecs.register::<MeleePowerBonus>();
     gs.ecs.register::<DefenseBonus>();
+    gs.ecs.register::<WantsToRemoveItem>();
 
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
     gs.ecs.insert(RandomNumberGenerator::new());

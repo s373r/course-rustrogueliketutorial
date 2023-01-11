@@ -83,6 +83,7 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             }
             I => return RunState::ShowInventory,
             F => return RunState::ShowDropItem,
+            R => return RunState::ShowRemoveItem,
             //
             Escape => return RunState::SaveGame,
             // Level changes

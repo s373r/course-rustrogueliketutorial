@@ -14,10 +14,10 @@ const MAX_MONSTERS: i32 = 4;
 /// Spawns the player and returns his/her entity object.
 pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
     // NOTE(DP): debug code -->
-    health_potion(ecs, player_x - 1, player_y - 1);
+    shield(ecs, player_x - 1, player_y - 1);
     fireball_scroll(ecs, player_x - 1, player_y + 1);
     confusion_scroll(ecs, player_x + 1, player_y - 1);
-    magic_missile_scroll(ecs, player_x + 1, player_y + 1);
+    dagger(ecs, player_x + 1, player_y + 1);
     // <--
 
     ecs.create_entity()
