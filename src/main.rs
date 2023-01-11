@@ -10,6 +10,7 @@ mod melee_combat_system;
 mod menu;
 mod monster_ai_system;
 mod player;
+mod random_table;
 mod rect;
 mod render_order;
 mod saveload_system;
