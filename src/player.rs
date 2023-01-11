@@ -1,6 +1,7 @@
 use super::{Map, Player, Position, State};
 use crate::components::{CombatStats, Item, Viewshed, WantsToMelee, WantsToPickupItem};
 use crate::game_log::GameLog;
+use crate::map::TileType;
 use crate::RunState;
 use rltk::{Point, Rltk, VirtualKeyCode};
 use specs::prelude::*;
@@ -82,6 +83,15 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             F => return RunState::ShowDropItem,
             //
             Escape => return RunState::SaveGame,
+            // Level changes
+            Period => {
+                if try_next_level(&mut gs.ecs) {
+                    return RunState::NextLevel;
+                }
+
+                None
+            }
+            //
             _ => None,
         },
         None => None,
@@ -129,4 +139,21 @@ fn get_item(ecs: &mut World) {
                 .expect("Unable to insert want to pickup");
         }
     }
+}
+
+pub fn try_next_level(ecs: &mut World) -> bool {
+    let player_pos = ecs.fetch::<Point>();
+    let map = ecs.fetch::<Map>();
+    let player_idx = map.xy_idx(player_pos.x, player_pos.y);
+
+    if map.tiles[player_idx] != TileType::DownStairs {
+        let mut game_log = ecs.fetch_mut::<GameLog>();
+
+        game_log
+            .entries
+            .push("There is no way down from here.".to_string());
+        return false;
+    }
+
+    true
 }
