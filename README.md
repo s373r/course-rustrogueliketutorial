@@ -69,7 +69,7 @@ Open http://0.0.0.0:8000/
   - [📝 2.9. Ranged Scrolls/Targeting](https://bfnightly.bracketproductions.com/rustbook/chapter_10.html)
   - [📝 2.10. Saving and Loading](https://bfnightly.bracketproductions.com/rustbook/chapter_11.html)
   - [📝 2.11. Delving Deeper](https://bfnightly.bracketproductions.com/rustbook/chapter_12.html)
-  - 🚧 2.12. Difficulty
+  - [📝 2.12. Difficulty](https://bfnightly.bracketproductions.com/rustbook/chapter_13.html)
   - 🚧 2.13. Equipment
 - 🚧 3. Section 2 - Stretch Goals
   - 🚧 3.1. Nice Walls with Bitsets
