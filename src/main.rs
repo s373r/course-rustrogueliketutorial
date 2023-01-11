@@ -218,7 +218,10 @@ impl GameState for State {
                     },
                     gui::MainMenuResult::Selected { selected } => match selected {
                         gui::MainMenuSelection::NewGame => RunState::PreRun,
-                        gui::MainMenuSelection::LoadGame => RunState::PreRun,
+                        gui::MainMenuSelection::LoadGame => {
+                            saveload_system::load_game(&mut self.ecs);
+                            RunState::AwaitingInput
+                        }
                         gui::MainMenuSelection::Quit => std::process::exit(0),
                     },
                 }
