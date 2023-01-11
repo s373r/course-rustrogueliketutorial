@@ -1,5 +1,5 @@
 use super::{Map, Player, Position, State};
-use crate::components::{CombatStats, Item, Viewshed, WantsToMelee, WantsToPickupItem};
+use crate::components::{CombatStats, Item, Monster, Viewshed, WantsToMelee, WantsToPickupItem};
 use crate::game_log::GameLog;
 use crate::map::TileType;
 use crate::RunState;
@@ -74,6 +74,8 @@ pub fn player_input(gs: &mut State, ctx: &mut Rltk) -> RunState {
             Q | U => Some((-1, -1)),
             X | N => Some((1, 1)),
             Z | B => Some((-1, 1)),
+            //
+            Space => return skip_turn(&mut gs.ecs),
             //
             G => {
                 get_item(&mut gs.ecs);
@@ -156,4 +158,35 @@ pub fn try_next_level(ecs: &mut World) -> bool {
     }
 
     true
+}
+
+fn skip_turn(ecs: &mut World) -> RunState {
+    let viewshed_components = ecs.read_storage::<Viewshed>();
+    let player_entity = ecs.fetch::<Entity>();
+    let viewshed = viewshed_components.get(*player_entity).unwrap();
+    let map_resource = ecs.fetch::<Map>();
+    let monsters = ecs.read_storage::<Monster>();
+    let mut can_heal = true;
+
+    'outer: for tile in viewshed.visible_tiles.iter() {
+        let idx = map_resource.xy_idx(tile.x, tile.y);
+
+        for entity_id in map_resource.tile_content[idx].iter() {
+            let has_mob = monsters.get(*entity_id).is_some();
+
+            if has_mob {
+                can_heal = false;
+                break 'outer;
+            }
+        }
+    }
+
+    if can_heal {
+        let mut health_components = ecs.write_storage::<CombatStats>();
+        let player_hp = health_components.get_mut(*player_entity).unwrap();
+
+        player_hp.hp = i32::min(player_hp.hp + 1, player_hp.max_hp);
+    }
+
+    RunState::PlayerTurn
 }
