@@ -252,7 +252,7 @@ impl GameState for State {
         let mut new_run_state = *self.ecs.fetch::<RunState>();
 
         match new_run_state {
-            RunState::MainMenu { .. } => {}
+            RunState::MainMenu { .. } | RunState::GameOver { .. } => {}
             _ => {
                 draw_map(&self.ecs, ctx);
 
