@@ -241,6 +241,9 @@ fn dagger(ecs: &mut World, x: i32, y: i32) {
             name: "Dagger".to_string(),
         })
         .with(Item {})
+        .with(Equippable {
+            slot: EquipmentSlot::Melee,
+        })
         .marked::<SimpleMarker<SerializeMe>>()
         .build();
 }
@@ -258,6 +261,9 @@ fn shield(ecs: &mut World, x: i32, y: i32) {
             name: "Shield".to_string(),
         })
         .with(Item {})
+        .with(Equippable {
+            slot: EquipmentSlot::Shield,
+        })
         .marked::<SimpleMarker<SerializeMe>>()
         .build();
 }
