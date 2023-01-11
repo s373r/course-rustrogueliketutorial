@@ -141,7 +141,7 @@ impl State {
 
         // Spawn bad guys
         for room in map.rooms.iter().skip(1) {
-            spawner::spawn_room(&mut self.ecs, room);
+            spawner::spawn_room(&mut self.ecs, room, map.depth);
         }
 
         // Place the player and update resources
@@ -389,10 +389,11 @@ fn main() -> rltk::BError {
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
     gs.ecs.insert(RandomNumberGenerator::new());
 
-    let map = Map::new_map_rooms_and_corridors(1);
+    let initial_map_depth = 1;
+    let map = Map::new_map_rooms_and_corridors(initial_map_depth);
 
     for room in map.rooms.iter().skip(1) {
-        spawner::spawn_room(&mut gs.ecs, room);
+        spawner::spawn_room(&mut gs.ecs, room, initial_map_depth);
     }
 
     let (player_x, player_y) = map.rooms.first().unwrap().center();
