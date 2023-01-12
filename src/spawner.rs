@@ -46,6 +46,10 @@ pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
             defense: 2,
             power: 5,
         })
+        .with(HungerClock {
+            state: HungerState::WellFed,
+            duration: 20,
+        })
         .marked::<SimpleMarker<SerializeMe>>()
         .build()
 }
