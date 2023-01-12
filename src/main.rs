@@ -9,6 +9,7 @@ mod map_indexing_system;
 mod melee_combat_system;
 mod menu;
 mod monster_ai_system;
+mod particle_system;
 mod player;
 mod random_table;
 mod rect;
@@ -248,6 +249,7 @@ impl State {
 impl GameState for State {
     fn tick(&mut self, ctx: &mut Rltk) {
         ctx.cls();
+        particle_system::cull_dead_particles(&mut self.ecs, ctx);
 
         let mut new_run_state = *self.ecs.fetch::<RunState>();
 
