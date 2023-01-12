@@ -98,7 +98,7 @@ impl<'a> System<'a> for ParticleSpawnSystem {
                         fg: particle_request.fg,
                         bg: particle_request.bg,
                         glyph: particle_request.glyph,
-                        render_order: RenderOrder::PlayerOrParticle,
+                        render_order: RenderOrder::Particle,
                     },
                 )
                 .expect("Unable to insert renderable");
