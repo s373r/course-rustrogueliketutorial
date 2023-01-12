@@ -1,7 +1,9 @@
-use crate::components::{CombatStats, Name, Player, SufferDamage};
+use crate::components::*;
 use crate::game_log::GameLog;
+use crate::map::Map;
 use crate::RunState;
-use rltk::console;
+use std::process::id;
+
 use specs::prelude::*;
 
 pub struct DamageSystem {}
@@ -10,13 +12,22 @@ impl<'a> System<'a> for DamageSystem {
     type SystemData = (
         WriteStorage<'a, CombatStats>,
         WriteStorage<'a, SufferDamage>,
+        ReadStorage<'a, Position>,
+        WriteExpect<'a, Map>,
+        Entities<'a>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (mut stats, mut damage) = data;
+        let (mut stats, mut damage, positions, mut map, entities) = data;
 
-        for (mut stats, damage) in (&mut stats, &damage).join() {
+        for (entity, mut stats, damage) in (&entities, &mut stats, &damage).join() {
             stats.hp -= damage.amount.iter().sum::<i32>();
+
+            if let Some(Position { x, y }) = positions.get(entity) {
+                let idx = map.xy_idx(*x, *y);
+
+                map.bloodstains.insert(idx);
+            }
         }
 
         damage.clear();
