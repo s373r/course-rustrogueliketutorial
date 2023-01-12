@@ -88,6 +88,9 @@ impl State {
         let mut item_remove = ItemRemoveSystem {};
         item_remove.run_now(&self.ecs);
 
+        let mut particles = particle_system::ParticleSpawnSystem {};
+        particles.run_now(&self.ecs);
+
         self.ecs.maintain();
     }
 
@@ -492,6 +495,7 @@ fn main() -> rltk::BError {
 
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
     gs.ecs.insert(RandomNumberGenerator::new());
+    gs.ecs.insert(particle_system::ParticleBuilder::new());
 
     let initial_map_depth = 1;
     let map = Map::new_map_rooms_and_corridors(initial_map_depth);

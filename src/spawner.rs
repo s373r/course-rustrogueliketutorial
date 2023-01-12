@@ -29,7 +29,7 @@ pub fn player(ecs: &mut World, player_x: i32, player_y: i32) -> Entity {
             glyph: rltk::to_cp437('@'),
             fg: RGB::named(rltk::YELLOW),
             bg: RGB::named(rltk::BLACK),
-            render_order: RenderOrder::Player,
+            render_order: RenderOrder::PlayerOrParticle,
         })
         .with(Player {})
         .with(Viewshed {
