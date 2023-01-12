@@ -2,6 +2,7 @@ use specs::prelude::*;
 
 use crate::components::*;
 use crate::game_log::GameLog;
+use crate::particle_system::ParticleBuilder;
 
 pub struct MeleeCombatSystem {}
 
@@ -16,6 +17,8 @@ impl<'a> System<'a> for MeleeCombatSystem {
         ReadStorage<'a, MeleePowerBonus>,
         ReadStorage<'a, DefenseBonus>,
         ReadStorage<'a, Equipped>,
+        WriteExpect<'a, ParticleBuilder>,
+        ReadStorage<'a, Position>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
@@ -29,6 +32,8 @@ impl<'a> System<'a> for MeleeCombatSystem {
             melee_power_bonuses,
             defense_bonuses,
             equipped,
+            mut particle_builder,
+            positions,
         ) = data;
 
         for (entity, wants_melee, name, stats) in
@@ -61,6 +66,17 @@ impl<'a> System<'a> for MeleeCombatSystem {
                 if equipped_by.owner == wants_melee.target {
                     defensive_bonus += defense_bonus.defense;
                 }
+            }
+
+            if let Some(Position { x, y }) = positions.get(wants_melee.target) {
+                particle_builder.request(
+                    *x,
+                    *y,
+                    rltk::RGB::named(rltk::ORANGE),
+                    rltk::RGB::named(rltk::BLACK),
+                    rltk::to_cp437('‼'),
+                    200.0,
+                );
             }
 
             let damage = i32::max(
