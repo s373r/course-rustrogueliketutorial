@@ -2,6 +2,7 @@ mod components;
 mod damage_system;
 mod game_log;
 mod gui;
+mod hunger_system;
 mod inventory_system;
 mod map;
 mod map_indexing_system;
@@ -87,6 +88,9 @@ impl State {
 
         let mut item_remove = ItemRemoveSystem {};
         item_remove.run_now(&self.ecs);
+
+        let mut hunger = hunger_system::HungerSystem {};
+        hunger.run_now(&self.ecs);
 
         let mut particles = particle_system::ParticleSpawnSystem {};
         particles.run_now(&self.ecs);
