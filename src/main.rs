@@ -3,7 +3,6 @@ mod damage_system;
 mod game_log;
 mod gui;
 mod inventory_system;
-mod item_use_system;
 mod map;
 mod map_indexing_system;
 mod melee_combat_system;
@@ -25,8 +24,9 @@ use specs::saveload::{SimpleMarker, SimpleMarkerAllocator};
 use crate::components::*;
 use crate::damage_system::DamageSystem;
 use crate::game_log::GameLog;
-use crate::inventory_system::{ItemCollectionSystem, ItemDropSystem, ItemRemoveSystem};
-use crate::item_use_system::ItemUseSystem;
+use crate::inventory_system::{
+    ItemCollectionSystem, ItemDropSystem, ItemRemoveSystem, ItemUseSystem,
+};
 use crate::map::*;
 use crate::map_indexing_system::MapIndexingSystem;
 use crate::melee_combat_system::MeleeCombatSystem;
