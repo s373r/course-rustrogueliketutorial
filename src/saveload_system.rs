@@ -94,7 +94,8 @@ pub fn save_game(ecs: &mut World) {
             DefenseBonus,
             WantsToRemoveItem,
             ParticleLifetime,
-            HungerClock
+            HungerClock,
+            ProvidesFood
         );
     }
 
@@ -163,7 +164,8 @@ pub fn load_game(ecs: &mut World) {
             DefenseBonus,
             WantsToRemoveItem,
             ParticleLifetime,
-            HungerClock
+            HungerClock,
+            ProvidesFood
         );
     }
 

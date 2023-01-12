@@ -138,6 +138,8 @@ impl<'a> System<'a> for ItemUseSystem {
         WriteStorage<'a, InBackpack>,
         WriteExpect<'a, ParticleBuilder>,
         ReadStorage<'a, Position>,
+        ReadStorage<'a, ProvidesFood>,
+        WriteStorage<'a, HungerClock>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
@@ -160,6 +162,8 @@ impl<'a> System<'a> for ItemUseSystem {
             mut backpack,
             mut particle_builder,
             positions,
+            provides_food,
+            mut hunger_clocks,
         ) = data;
 
         for (entity, use_item) in (&entities, &wants_use_item).join() {
@@ -248,6 +252,23 @@ impl<'a> System<'a> for ItemUseSystem {
                 if target == *player_entity {
                     game_log.entries.push(format!(
                         "You equip {}.",
+                        names.get(use_item.item).unwrap().name
+                    ));
+                }
+            }
+
+            // It it is edible, eat it!
+            if provides_food.get(use_item.item).is_some() {
+                used_item = true;
+
+                let target = targets.first().unwrap();
+
+                if let Some(hc) = hunger_clocks.get_mut(*target) {
+                    hc.state = HungerState::WellFed;
+                    hc.duration = 20;
+
+                    game_log.entries.push(format!(
+                        "You eat the {}.",
                         names.get(use_item.item).unwrap().name
                     ));
                 }
