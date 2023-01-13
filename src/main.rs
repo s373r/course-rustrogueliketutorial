@@ -17,6 +17,7 @@ mod render_order;
 mod rex_assets;
 mod saveload_system;
 mod spawner;
+mod trigger_system;
 mod visibility_system;
 
 use rltk::{GameState, Point, RandomNumberGenerator, Rltk};
@@ -71,6 +72,9 @@ impl State {
 
         let mut mob = MonsterAI {};
         mob.run_now(&self.ecs);
+
+        let mut triggers = trigger_system::TriggerSystem {};
+        triggers.run_now(&self.ecs);
 
         let mut map_index = MapIndexingSystem {};
         map_index.run_now(&self.ecs);
@@ -525,6 +529,9 @@ fn main() -> rltk::BError {
     gs.ecs.register::<HungerClock>();
     gs.ecs.register::<ProvidesFood>();
     gs.ecs.register::<MagicMapper>();
+    gs.ecs.register::<Hidden>();
+    gs.ecs.register::<EntryTrigger>();
+    gs.ecs.register::<EntityMoved>();
 
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
     gs.ecs.insert(RandomNumberGenerator::new());

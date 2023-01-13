@@ -14,6 +14,7 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     let map = ecs.fetch::<Map>();
     let entities = ecs.entities();
     let mut wants_to_melee = ecs.write_storage::<WantsToMelee>();
+    let mut entity_moved = ecs.write_storage::<EntityMoved>();
 
     for (entity, _player, pos, viewshed) in
         (&entities, &mut players, &mut positions, &mut viewsheds).join()
@@ -50,6 +51,10 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
         if !map.blocked[destination_idx] {
             pos.x = new_x;
             pos.y = new_y;
+
+            entity_moved
+                .insert(entity, EntityMoved {})
+                .expect("Unable to insert marker");
 
             let mut player_pos = ecs.write_resource::<Point>();
             player_pos.x = pos.x;
