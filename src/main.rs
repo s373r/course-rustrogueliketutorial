@@ -160,23 +160,23 @@ impl State {
         }
 
         // Build a new map and place the player
-        let initial_map_depth = 1;
-        let mut builder = map_builders::random_builder(initial_map_depth);
-
-        let (map, start_position) = {
+        let builder = {
             let mut map_resource = self.ecs.write_resource::<Map>();
             let current_depth = map_resource.depth;
+            let mut builder = map_builders::random_builder(current_depth + 1);
 
-            let (map, start_position) = builder.build_map(current_depth + 1);
-            *map_resource = map;
+            builder.build_map();
 
-            (map_resource.clone(), start_position)
+            *map_resource = builder.get_map();
+
+            builder
         };
 
         // Spawn bad guys
-        builder.spawn_entities(&map, &mut self.ecs, map.depth);
+        builder.spawn_entities(&mut self.ecs);
 
         // Place the player and update resources
+        let start_position = builder.get_starting_position();
         let (player_x, player_y) = (start_position.x, start_position.y);
         let mut player_position = self.ecs.write_resource::<Point>();
 
@@ -228,23 +228,27 @@ impl State {
         let initial_map_depth = 1;
         let mut builder = map_builders::random_builder(initial_map_depth);
 
-        let (map, start_position) = {
+        let builder = {
             let mut map_resource = self.ecs.write_resource::<Map>();
 
-            let (map, start_position) = builder.build_map(initial_map_depth);
-            *map_resource = map;
+            builder.build_map();
 
-            (map_resource.clone(), start_position)
+            *map_resource = builder.get_map();
+
+            builder
         };
 
         // Spawn bad guys
-        builder.spawn_entities(&map, &mut self.ecs, 1);
+        builder.spawn_entities(&mut self.ecs);
 
         // Place the player and update resources
+        let start_position = builder.get_starting_position();
         let (player_x, player_y) = (start_position.x, start_position.y);
         let player_entity = spawner::player(&mut self.ecs, player_x, player_y);
         let mut player_position = self.ecs.write_resource::<Point>();
+
         *player_position = Point::new(player_x, player_y);
+
         let mut position_components = self.ecs.write_storage::<Position>();
         let mut player_entity_writer = self.ecs.write_resource::<Entity>();
 
@@ -545,17 +549,18 @@ fn main() -> rltk::BError {
     gs.ecs.insert(rex_assets::RexAssets::new());
 
     // Build a new map and place the player
-    let initial_map_depth = 1;
-    let mut builder = map_builders::random_builder(initial_map_depth);
-    let (map, start_position) = builder.build_map(initial_map_depth);
+    let mut builder = map_builders::random_builder(1);
+
+    builder.build_map();
 
     // Spawn bad guys
-    builder.spawn_entities(&map, &mut gs.ecs, initial_map_depth);
+    builder.spawn_entities(&mut gs.ecs);
 
+    let start_position = builder.get_starting_position();
     let (player_x, player_y) = (start_position.x, start_position.y);
 
     gs.ecs.insert(Point::new(player_x, player_y));
-    gs.ecs.insert(map);
+    gs.ecs.insert(builder.get_map());
 
     let player_entity = spawner::player(&mut gs.ecs, player_x, player_y);
 
