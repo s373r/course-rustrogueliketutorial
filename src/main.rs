@@ -14,6 +14,7 @@ mod player;
 mod random_table;
 mod rect;
 mod render_order;
+mod rex_assets;
 mod saveload_system;
 mod spawner;
 mod visibility_system;
@@ -525,6 +526,7 @@ fn main() -> rltk::BError {
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());
     gs.ecs.insert(RandomNumberGenerator::new());
     gs.ecs.insert(particle_system::ParticleBuilder::new());
+    gs.ecs.insert(rex_assets::RexAssets::new());
 
     let initial_map_depth = 1;
     let map = Map::new_map_rooms_and_corridors(initial_map_depth);
