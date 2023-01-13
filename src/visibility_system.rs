@@ -1,7 +1,9 @@
-use super::{Map, Position, Viewshed};
-use crate::components::Player;
 use rltk::{field_of_view, Point};
 use specs::prelude::*;
+
+use crate::components::*;
+use crate::game_log::GameLog;
+use crate::map::Map;
 
 pub struct VisibilitySystem {}
 
@@ -12,14 +14,30 @@ impl<'a> System<'a> for VisibilitySystem {
         WriteStorage<'a, Viewshed>,
         WriteStorage<'a, Position>,
         ReadStorage<'a, Player>,
+        WriteStorage<'a, Hidden>,
+        WriteExpect<'a, rltk::RandomNumberGenerator>,
+        WriteExpect<'a, GameLog>,
+        ReadStorage<'a, Name>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (mut map, entities, mut viewshed, pos, player) = data;
+        let (
+            mut map,
+            entities,
+            mut viewshed,
+            pos,
+            player,
+            mut hidden,
+            mut rng,
+            mut game_log,
+            names,
+        ) = data;
 
+        // TODO(DP): use early ~~returns~~ continues
         for (ent, viewshed, pos) in (&entities, &mut viewshed, &pos).join() {
             if viewshed.dirty {
                 viewshed.dirty = false;
+                // TODO(DP): remove
                 viewshed.visible_tiles.clear();
                 viewshed.visible_tiles =
                     field_of_view(Point::new(pos.x, pos.y), viewshed.range, &*map);
@@ -29,6 +47,7 @@ impl<'a> System<'a> for VisibilitySystem {
 
                 // If this is the player, reveal what they can see
                 if player.get(ent).is_some() {
+                    // TODO(DP): use fill()
                     for visible_tile in map.visible_tiles.iter_mut() {
                         *visible_tile = false
                     }
@@ -37,6 +56,27 @@ impl<'a> System<'a> for VisibilitySystem {
                         let idx = map.xy_idx(vis.x, vis.y);
                         map.revealed_tiles[idx] = true;
                         map.visible_tiles[idx] = true;
+
+                        // Chance to reveal hidden things
+                        for tile_entity in map.tile_content[idx].iter() {
+                            let maybe_hidden = hidden.get(*tile_entity);
+
+                            if maybe_hidden.is_none() {
+                                continue;
+                            }
+
+                            if rng.roll_dice(1, 24) != 1 {
+                                continue;
+                            }
+
+                            if let Some(name) = names.get(*tile_entity) {
+                                game_log
+                                    .entries
+                                    .push(format!("You spotted a {}.", &name.name));
+                            }
+
+                            hidden.remove(*tile_entity);
+                        }
                     }
                 }
             }
