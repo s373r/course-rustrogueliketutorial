@@ -80,7 +80,7 @@ Open http://0.0.0.0:8000/
   - [📝 3.6. REX Paint Menu](https://bfnightly.bracketproductions.com/rustbook/chapter_21.html)
   - [📝 3.7. Simple Traps](https://bfnightly.bracketproductions.com/rustbook/chapter_22.html)
 - [📝 4. Section 3 - Generating Maps](https://bfnightly.bracketproductions.com/rustbook/chapter23-prefix.html)
-  - 🚧 4.1. Refactor Map Building
+  - [📝 4.1. Refactor Map Building](https://bfnightly.bracketproductions.com/rustbook/chapter_23.html)
   - 🚧 4.2. Map Building Test Harness
   - 🚧 4.3. BSP Room Dungeons
   - 🚧 4.4. BSP Interior Design
