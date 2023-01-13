@@ -38,6 +38,7 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
 
     let run_state = *gs.ecs.fetch::<RunState>();
     let save_exists = saveload_system::does_save_exist();
+    let mut y = 24;
 
     match run_state {
         RunState::MainMenu {
@@ -45,48 +46,50 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
         } => {
             if selection == MainMenuSelection::NewGame {
                 ctx.print_color_centered(
-                    24,
+                    y,
                     RGB::named(rltk::MAGENTA),
                     RGB::named(rltk::BLACK),
                     "Begin New Game",
                 );
             } else {
                 ctx.print_color_centered(
-                    24,
+                    y,
                     RGB::named(rltk::WHITE),
                     RGB::named(rltk::BLACK),
                     "Begin New Game",
                 );
             }
+            y += 1;
 
             if save_exists {
                 if selection == MainMenuSelection::LoadGame {
                     ctx.print_color_centered(
-                        25,
+                        y,
                         RGB::named(rltk::MAGENTA),
                         RGB::named(rltk::BLACK),
                         "Load Game",
                     );
                 } else {
                     ctx.print_color_centered(
-                        25,
+                        y,
                         RGB::named(rltk::WHITE),
                         RGB::named(rltk::BLACK),
                         "Load Game",
                     );
                 }
+                y += 1;
             }
 
             if selection == MainMenuSelection::Quit {
                 ctx.print_color_centered(
-                    26,
+                    y,
                     RGB::named(rltk::MAGENTA),
                     RGB::named(rltk::BLACK),
                     "Quit",
                 );
             } else {
                 ctx.print_color_centered(
-                    26,
+                    y,
                     RGB::named(rltk::WHITE),
                     RGB::named(rltk::BLACK),
                     "Quit",
