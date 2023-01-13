@@ -167,27 +167,28 @@ fn skip_turn(ecs: &mut World) -> RunState {
     let viewshed = viewshed_components.get(*player_entity).unwrap();
     let map_resource = ecs.fetch::<Map>();
     let monsters = ecs.read_storage::<Monster>();
-    let mut can_heal = true;
-
-    'outer: for tile in viewshed.visible_tiles.iter() {
-        let idx = map_resource.xy_idx(tile.x, tile.y);
-
-        for entity_id in map_resource.tile_content[idx].iter() {
-            let has_mob = monsters.get(*entity_id).is_some();
-
-            if has_mob {
-                can_heal = false;
-                break 'outer;
-            }
-        }
-    }
-
     let hunger_clocks = ecs.read_storage::<HungerClock>();
+    let mut can_heal = true;
 
     if let Some(HungerClock { state, .. }) = hunger_clocks.get(*player_entity) {
         match state {
             HungerState::Hungry | HungerState::Starving => can_heal = false,
             _ => {}
+        }
+    }
+
+    if !can_heal {
+        'outer: for tile in viewshed.visible_tiles.iter() {
+            let idx = map_resource.xy_idx(tile.x, tile.y);
+
+            for entity_id in map_resource.tile_content[idx].iter() {
+                let has_mob = monsters.get(*entity_id).is_some();
+
+                if has_mob {
+                    can_heal = false;
+                    break 'outer;
+                }
+            }
         }
     }
 
