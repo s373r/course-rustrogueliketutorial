@@ -9,11 +9,31 @@ pub fn main_menu(gs: &mut State, ctx: &mut Rltk) -> MainMenuResult {
 
     ctx.render_xp_sprite(&assets.menu, 0, 0);
 
+    ctx.draw_box_double(
+        24,
+        18,
+        31,
+        10,
+        RGB::named(rltk::WHEAT),
+        RGB::named(rltk::BLACK),
+    );
     ctx.print_color_centered(
-        15,
+        20,
         RGB::named(rltk::YELLOW),
         RGB::named(rltk::BLACK),
         "Rust Roguelike Tutorial",
+    );
+    ctx.print_color_centered(
+        21,
+        RGB::named(rltk::CYAN),
+        RGB::named(rltk::BLACK),
+        "by Herbert Wolverson",
+    );
+    ctx.print_color_centered(
+        22,
+        RGB::named(rltk::GRAY),
+        RGB::named(rltk::BLACK),
+        "Use Up/Down Arrows and Enter",
     );
 
     let run_state = *gs.ecs.fetch::<RunState>();
