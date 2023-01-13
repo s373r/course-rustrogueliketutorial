@@ -147,6 +147,22 @@ impl Map {
             content.clear();
         }
     }
+
+    /// Generates an empty map, consisting entirely of solid walls
+    pub fn new(new_depth: i32) -> Map {
+        Map {
+            tiles: vec![TileType::Wall; Map::LENGTH],
+            rooms: Vec::new(),
+            width: Map::WIDTH as i32,
+            height: Map::HEIGHT as i32,
+            revealed_tiles: vec![false; Map::LENGTH],
+            visible_tiles: vec![false; Map::LENGTH],
+            blocked: vec![false; Map::LENGTH],
+            tile_content: vec![Vec::new(); Map::LENGTH],
+            depth: new_depth,
+            bloodstains: HashSet::new(),
+        }
+    }
 }
 
 impl Algorithm2D for Map {

@@ -5,6 +5,7 @@ mod gui;
 mod hunger_system;
 mod inventory_system;
 mod map;
+mod map_builders;
 mod map_indexing_system;
 mod melee_combat_system;
 mod menu;
