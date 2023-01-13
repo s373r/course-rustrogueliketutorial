@@ -160,7 +160,8 @@ impl State {
         }
 
         // Build a new map and place the player
-        let mut builder = map_builders::random_builder();
+        let initial_map_depth = 1;
+        let mut builder = map_builders::random_builder(initial_map_depth);
 
         let (map, start_position) = {
             let mut map_resource = self.ecs.write_resource::<Map>();
@@ -224,12 +225,13 @@ impl State {
         }
 
         // Build a new map and place the player
-        let mut builder = map_builders::random_builder();
+        let initial_map_depth = 1;
+        let mut builder = map_builders::random_builder(initial_map_depth);
 
         let (map, start_position) = {
             let mut map_resource = self.ecs.write_resource::<Map>();
 
-            let (map, start_position) = builder.build_map(1);
+            let (map, start_position) = builder.build_map(initial_map_depth);
             *map_resource = map;
 
             (map_resource.clone(), start_position)
@@ -544,7 +546,7 @@ fn main() -> rltk::BError {
 
     // Build a new map and place the player
     let initial_map_depth = 1;
-    let mut builder = map_builders::random_builder();
+    let mut builder = map_builders::random_builder(initial_map_depth);
     let (map, start_position) = builder.build_map(initial_map_depth);
 
     // Spawn bad guys
