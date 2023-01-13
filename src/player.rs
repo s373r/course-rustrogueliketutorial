@@ -1,5 +1,7 @@
 use super::{Map, Player, Position, State};
-use crate::components::{CombatStats, Item, Monster, Viewshed, WantsToMelee, WantsToPickupItem};
+use crate::components::{
+    CombatStats, HungerClock, HungerState, Item, Monster, Viewshed, WantsToMelee, WantsToPickupItem,
+};
 use crate::game_log::GameLog;
 use crate::map::TileType;
 use crate::RunState;
@@ -179,6 +181,15 @@ fn skip_turn(ecs: &mut World) -> RunState {
                 can_heal = false;
                 break 'outer;
             }
+        }
+    }
+
+    let hunger_clocks = ecs.read_storage::<HungerClock>();
+
+    if let Some(HungerClock { state, .. }) = hunger_clocks.get(*player_entity) {
+        match state {
+            HungerState::Hungry | HungerState::Starving => can_heal = false,
+            _ => {}
         }
     }
 
