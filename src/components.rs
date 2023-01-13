@@ -195,3 +195,6 @@ pub struct ProvidesFood {}
 
 #[derive(Component, Debug, Serialize, Deserialize, Clone)]
 pub struct MagicMapper {}
+
+#[derive(Component, Debug, Serialize, Deserialize, Clone)]
+pub struct Hidden {}
