@@ -122,7 +122,7 @@ impl<'a> System<'a> for ItemUseSystem {
     type SystemData = (
         ReadExpect<'a, Entity>,
         WriteExpect<'a, GameLog>,
-        ReadExpect<'a, Map>,
+        WriteExpect<'a, Map>,
         Entities<'a>,
         WriteStorage<'a, WantsToUseItem>,
         ReadStorage<'a, Name>,
@@ -140,13 +140,14 @@ impl<'a> System<'a> for ItemUseSystem {
         ReadStorage<'a, Position>,
         ReadStorage<'a, ProvidesFood>,
         WriteStorage<'a, HungerClock>,
+        ReadStorage<'a, MagicMapper>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
         let (
             player_entity,
             mut game_log,
-            map,
+            mut map,
             entities,
             mut wants_use_item,
             names,
@@ -164,6 +165,7 @@ impl<'a> System<'a> for ItemUseSystem {
             positions,
             provides_food,
             mut hunger_clocks,
+            magic_mapper,
         ) = data;
 
         for (entity, use_item) in (&entities, &wants_use_item).join() {
@@ -255,6 +257,17 @@ impl<'a> System<'a> for ItemUseSystem {
                         names.get(use_item.item).unwrap().name
                     ));
                 }
+            }
+
+            // If its a magic mapper...
+            if magic_mapper.get(use_item.item).is_some() {
+                used_item = true;
+
+                map.revealed_tiles.fill(true);
+
+                game_log
+                    .entries
+                    .push("The map is revealed to you!".to_string());
             }
 
             // It it is edible, eat it!
