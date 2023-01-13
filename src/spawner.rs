@@ -377,6 +377,8 @@ fn bear_trap(ecs: &mut World, x: i32, y: i32) {
             name: "Bear Trap".to_string(),
         })
         .with(Hidden {})
+        .with(EntryTrigger {})
+        .with(InflictsDamage { damage: 6 })
         .marked::<SimpleMarker<SerializeMe>>()
         .build();
 }
