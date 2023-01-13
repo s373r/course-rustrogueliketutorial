@@ -160,13 +160,14 @@ impl State {
         }
 
         // Build a new map and place the player
-        let map = {
+        let (map, start_position) = {
             let mut map_resource = self.ecs.write_resource::<Map>();
             let current_depth = map_resource.depth;
 
-            *map_resource = map_builders::build_random_map(current_depth + 1);
+            let (map, start_position) = map_builders::build_random_map(current_depth + 1);
+            *map_resource = map;
 
-            map_resource.clone()
+            (map_resource.clone(), start_position)
         };
 
         // Spawn bad guys
@@ -175,7 +176,7 @@ impl State {
         }
 
         // Place the player and update resources
-        let (player_x, player_y) = map.rooms[0].center();
+        let (player_x, player_y) = (start_position.x, start_position.y);
         let mut player_position = self.ecs.write_resource::<Point>();
 
         *player_position = Point::new(player_x, player_y);
@@ -223,12 +224,13 @@ impl State {
         }
 
         // Build a new map and place the player
-        let map = {
+        let (map, start_position) = {
             let mut map_resource = self.ecs.write_resource::<Map>();
 
-            *map_resource = map_builders::build_random_map(1);
+            let (map, start_position) = map_builders::build_random_map(1);
+            *map_resource = map;
 
-            map_resource.clone()
+            (map_resource.clone(), start_position)
         };
 
         // Spawn bad guys
@@ -237,7 +239,7 @@ impl State {
         }
 
         // Place the player and update resources
-        let (player_x, player_y) = map.rooms.first().unwrap().center();
+        let (player_x, player_y) = (start_position.x, start_position.y);
         let player_entity = spawner::player(&mut self.ecs, player_x, player_y);
         let mut player_position = self.ecs.write_resource::<Point>();
         *player_position = Point::new(player_x, player_y);
@@ -540,14 +542,16 @@ fn main() -> rltk::BError {
     gs.ecs.insert(particle_system::ParticleBuilder::new());
     gs.ecs.insert(rex_assets::RexAssets::new());
 
+    // Build a new map and place the player
     let initial_map_depth = 1;
-    let map = map_builders::build_random_map(initial_map_depth);
+    let (map, start_position) = map_builders::build_random_map(initial_map_depth);
 
+    // Spawn bad guys
     for room in map.rooms.iter().skip(1) {
         spawner::spawn_room(&mut gs.ecs, room, initial_map_depth);
     }
 
-    let (player_x, player_y) = map.rooms.first().unwrap().center();
+    let (player_x, player_y) = (start_position.x, start_position.y);
 
     gs.ecs.insert(Point::new(player_x, player_y));
     gs.ecs.insert(map);
