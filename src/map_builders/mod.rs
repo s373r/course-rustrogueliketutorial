@@ -1,3 +1,4 @@
+mod common;
 mod simple_map;
 
 use crate::map::Map;

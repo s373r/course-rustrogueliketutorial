@@ -164,7 +164,7 @@ impl State {
             let mut map_resource = self.ecs.write_resource::<Map>();
             let current_depth = map_resource.depth;
 
-            *map_resource = Map::new_map_rooms_and_corridors(current_depth + 1);
+            *map_resource = map_builders::build_random_map(current_depth + 1);
 
             map_resource.clone()
         };
@@ -226,7 +226,7 @@ impl State {
         let map = {
             let mut map_resource = self.ecs.write_resource::<Map>();
 
-            *map_resource = Map::new_map_rooms_and_corridors(1);
+            *map_resource = map_builders::build_random_map(1);
 
             map_resource.clone()
         };
@@ -541,7 +541,7 @@ fn main() -> rltk::BError {
     gs.ecs.insert(rex_assets::RexAssets::new());
 
     let initial_map_depth = 1;
-    let map = Map::new_map_rooms_and_corridors(initial_map_depth);
+    let map = map_builders::build_random_map(initial_map_depth);
 
     for room in map.rooms.iter().skip(1) {
         spawner::spawn_room(&mut gs.ecs, room, initial_map_depth);
