@@ -160,18 +160,20 @@ impl State {
         }
 
         // Build a new map and place the player
+        let mut builder = map_builders::random_builder();
+
         let (map, start_position) = {
             let mut map_resource = self.ecs.write_resource::<Map>();
             let current_depth = map_resource.depth;
 
-            let (map, start_position) = map_builders::build_random_map(current_depth + 1);
+            let (map, start_position) = builder.build_map(current_depth + 1);
             *map_resource = map;
 
             (map_resource.clone(), start_position)
         };
 
         // Spawn bad guys
-        map_builders::spawn(&map, &mut self.ecs, map.depth);
+        builder.spawn_entities(&map, &mut self.ecs, map.depth);
 
         // Place the player and update resources
         let (player_x, player_y) = (start_position.x, start_position.y);
@@ -222,17 +224,19 @@ impl State {
         }
 
         // Build a new map and place the player
+        let mut builder = map_builders::random_builder();
+
         let (map, start_position) = {
             let mut map_resource = self.ecs.write_resource::<Map>();
 
-            let (map, start_position) = map_builders::build_random_map(1);
+            let (map, start_position) = builder.build_map(1);
             *map_resource = map;
 
             (map_resource.clone(), start_position)
         };
 
         // Spawn bad guys
-        map_builders::spawn(&map, &mut self.ecs, 1);
+        builder.spawn_entities(&map, &mut self.ecs, 1);
 
         // Place the player and update resources
         let (player_x, player_y) = (start_position.x, start_position.y);
@@ -540,10 +544,11 @@ fn main() -> rltk::BError {
 
     // Build a new map and place the player
     let initial_map_depth = 1;
-    let (map, start_position) = map_builders::build_random_map(initial_map_depth);
+    let mut builder = map_builders::random_builder();
+    let (map, start_position) = builder.build_map(initial_map_depth);
 
     // Spawn bad guys
-    map_builders::spawn(&map, &mut gs.ecs, initial_map_depth);
+    builder.spawn_entities(&map, &mut gs.ecs, initial_map_depth);
 
     let (player_x, player_y) = (start_position.x, start_position.y);
 

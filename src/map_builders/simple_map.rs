@@ -70,14 +70,14 @@ impl SimpleMapBuilder {
 }
 
 impl MapBuilder for SimpleMapBuilder {
-    fn build(new_depth: i32) -> (Map, Position) {
+    fn build_map(&mut self, new_depth: i32) -> (Map, Position) {
         let mut map = Map::new(new_depth);
         let player_position = SimpleMapBuilder::rooms_and_corridors(&mut map);
 
         (map, player_position)
     }
 
-    fn spawn(map: &Map, ecs: &mut World, new_depth: i32) {
+    fn spawn_entities(&mut self, map: &Map, ecs: &mut World, new_depth: i32) {
         SimpleMapBuilder::spawn(map, ecs, new_depth)
     }
 }
