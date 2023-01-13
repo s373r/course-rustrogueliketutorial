@@ -19,6 +19,7 @@ impl<'a> System<'a> for MeleeCombatSystem {
         ReadStorage<'a, Equipped>,
         WriteExpect<'a, ParticleBuilder>,
         ReadStorage<'a, Position>,
+        ReadStorage<'a, HungerClock>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
@@ -34,6 +35,7 @@ impl<'a> System<'a> for MeleeCombatSystem {
             equipped,
             mut particle_builder,
             positions,
+            hunger_clock,
         ) = data;
 
         for (entity, wants_melee, name, stats) in
@@ -49,6 +51,12 @@ impl<'a> System<'a> for MeleeCombatSystem {
             {
                 if equipped_by.owner == entity {
                     offensive_bonus += power_bonus.power;
+                }
+            }
+
+            if let Some(HungerClock { state, .. }) = hunger_clock.get(entity) {
+                if *state == HungerState::WellFed {
+                    offensive_bonus += 1;
                 }
             }
 
