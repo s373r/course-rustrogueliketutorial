@@ -54,6 +54,9 @@ pub enum RunState {
     NextLevel,
     ShowRemoveItem,
     GameOver,
+    MagicMapReveal {
+        row: i32,
+    },
 }
 
 pub struct State {
@@ -295,7 +298,11 @@ impl GameState for State {
             RunState::AwaitingInput => player_input(self, ctx),
             RunState::PlayerTurn => {
                 self.run_systems();
-                RunState::MonsterTurn
+
+                match *self.ecs.fetch::<RunState>() {
+                    RunState::MagicMapReveal { .. } => RunState::MagicMapReveal { row: 0 },
+                    _ => RunState::MonsterTurn,
+                }
             }
             RunState::MonsterTurn => {
                 self.run_systems();
@@ -441,6 +448,21 @@ impl GameState for State {
                             menu_selection: gui::MainMenuSelection::NewGame,
                         }
                     }
+                }
+            }
+            RunState::MagicMapReveal { row } => {
+                let mut map = self.ecs.fetch_mut::<Map>();
+
+                for x in 0..Map::WIDTH {
+                    let idx = map.xy_idx(x as i32, row);
+
+                    map.revealed_tiles[idx] = true;
+                }
+
+                if row as usize == Map::HEIGHT - 1 {
+                    RunState::MonsterTurn
+                } else {
+                    RunState::MagicMapReveal { row: row + 1 }
                 }
             }
         };

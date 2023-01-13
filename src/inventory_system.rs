@@ -4,6 +4,7 @@ use crate::components::*;
 use crate::game_log::GameLog;
 use crate::map::Map;
 use crate::particle_system::ParticleBuilder;
+use crate::RunState;
 
 pub struct ItemCollectionSystem {}
 
@@ -122,7 +123,7 @@ impl<'a> System<'a> for ItemUseSystem {
     type SystemData = (
         ReadExpect<'a, Entity>,
         WriteExpect<'a, GameLog>,
-        WriteExpect<'a, Map>,
+        ReadExpect<'a, Map>,
         Entities<'a>,
         WriteStorage<'a, WantsToUseItem>,
         ReadStorage<'a, Name>,
@@ -141,13 +142,14 @@ impl<'a> System<'a> for ItemUseSystem {
         ReadStorage<'a, ProvidesFood>,
         WriteStorage<'a, HungerClock>,
         ReadStorage<'a, MagicMapper>,
+        WriteExpect<'a, RunState>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
         let (
             player_entity,
             mut game_log,
-            mut map,
+            map,
             entities,
             mut wants_use_item,
             names,
@@ -166,6 +168,7 @@ impl<'a> System<'a> for ItemUseSystem {
             provides_food,
             mut hunger_clocks,
             magic_mapper,
+            mut run_state,
         ) = data;
 
         for (entity, use_item) in (&entities, &wants_use_item).join() {
@@ -263,7 +266,7 @@ impl<'a> System<'a> for ItemUseSystem {
             if magic_mapper.get(use_item.item).is_some() {
                 used_item = true;
 
-                map.revealed_tiles.fill(true);
+                *run_state = RunState::MagicMapReveal { row: 0 };
 
                 game_log
                     .entries
