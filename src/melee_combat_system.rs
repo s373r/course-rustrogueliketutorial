@@ -45,6 +45,12 @@ impl<'a> System<'a> for MeleeCombatSystem {
                 continue;
             }
 
+            let target_stats = combat_stats.get(wants_melee.target).unwrap();
+
+            if target_stats.hp <= 0 {
+                continue;
+            }
+
             let mut offensive_bonus = 0;
 
             for (_, power_bonus, equipped_by) in (&entities, &melee_power_bonuses, &equipped).join()
@@ -58,12 +64,6 @@ impl<'a> System<'a> for MeleeCombatSystem {
                 if *state == HungerState::WellFed {
                     offensive_bonus += 1;
                 }
-            }
-
-            let target_stats = combat_stats.get(wants_melee.target).unwrap();
-
-            if target_stats.hp <= 0 {
-                continue;
             }
 
             let target_name = names.get(wants_melee.target).unwrap();
