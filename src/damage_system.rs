@@ -2,7 +2,6 @@ use crate::components::*;
 use crate::game_log::GameLog;
 use crate::map::Map;
 use crate::RunState;
-use std::process::id;
 
 use specs::prelude::*;
 
