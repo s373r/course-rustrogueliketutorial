@@ -171,9 +171,7 @@ impl State {
         };
 
         // Spawn bad guys
-        for room in map.rooms.iter().skip(1) {
-            spawner::spawn_room(&mut self.ecs, room, map.depth);
-        }
+        map_builders::spawn(&map, &mut self.ecs, map.depth);
 
         // Place the player and update resources
         let (player_x, player_y) = (start_position.x, start_position.y);
@@ -234,9 +232,7 @@ impl State {
         };
 
         // Spawn bad guys
-        for room in map.rooms.iter().skip(1) {
-            spawner::spawn_room(&mut self.ecs, room, 1);
-        }
+        map_builders::spawn(&map, &mut self.ecs, 1);
 
         // Place the player and update resources
         let (player_x, player_y) = (start_position.x, start_position.y);
@@ -547,9 +543,7 @@ fn main() -> rltk::BError {
     let (map, start_position) = map_builders::build_random_map(initial_map_depth);
 
     // Spawn bad guys
-    for room in map.rooms.iter().skip(1) {
-        spawner::spawn_room(&mut gs.ecs, room, initial_map_depth);
-    }
+    map_builders::spawn(&map, &mut gs.ecs, initial_map_depth);
 
     let (player_x, player_y) = (start_position.x, start_position.y);
 

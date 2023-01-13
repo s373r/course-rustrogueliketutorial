@@ -1,10 +1,12 @@
 use rltk::RandomNumberGenerator;
+use specs::World;
 
 use crate::components::Position;
 use crate::map::{Map, TileType};
 use crate::map_builders::common::{apply_horizontal_tunnel, apply_room, apply_vertical_tunnel};
 use crate::map_builders::MapBuilder;
 use crate::rect::Rect;
+use crate::spawner;
 
 pub struct SimpleMapBuilder {}
 
@@ -59,6 +61,12 @@ impl SimpleMapBuilder {
 
         Position { x, y }
     }
+
+    pub fn spawn(map: &Map, ecs: &mut World, new_depth: i32) {
+        for room in map.rooms.iter().skip(1) {
+            spawner::spawn_room(ecs, room, new_depth);
+        }
+    }
 }
 
 impl MapBuilder for SimpleMapBuilder {
@@ -67,5 +75,9 @@ impl MapBuilder for SimpleMapBuilder {
         let player_position = SimpleMapBuilder::rooms_and_corridors(&mut map);
 
         (map, player_position)
+    }
+
+    fn spawn(map: &Map, ecs: &mut World, new_depth: i32) {
+        SimpleMapBuilder::spawn(map, ecs, new_depth)
     }
 }
