@@ -1,12 +1,10 @@
-use super::{Map, Player, Position, State};
-use crate::components::{
-    CombatStats, HungerClock, HungerState, Item, Monster, Viewshed, WantsToMelee, WantsToPickupItem,
-};
-use crate::game_log::GameLog;
-use crate::map::TileType;
-use crate::RunState;
 use rltk::{Point, Rltk, VirtualKeyCode};
 use specs::prelude::*;
+
+use crate::components::*;
+use crate::game_log::GameLog;
+use crate::map::{Map, TileType};
+use crate::{RunState, State};
 
 pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     let mut positions = ecs.write_storage::<Position>();
