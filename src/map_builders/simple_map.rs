@@ -12,6 +12,7 @@ pub struct SimpleMapBuilder {
     map: Map,
     starting_position: Position,
     depth: i32,
+    rooms: Vec<Rect>,
 }
 
 impl SimpleMapBuilder {
@@ -20,6 +21,7 @@ impl SimpleMapBuilder {
             map: Map::new(new_depth),
             starting_position: Position { x: 0, y: 0 },
             depth: new_depth,
+            rooms: Vec::new(),
         }
     }
 
@@ -37,7 +39,6 @@ impl SimpleMapBuilder {
             let y = rng.roll_dice(1, self.map.height - h - 1) - 1;
             let new_room = Rect::new(x, y, w, h);
             let has_intersect_other_rooms = self
-                .map
                 .rooms
                 .iter()
                 .any(|another_room| new_room.intersect(another_room));
@@ -48,9 +49,9 @@ impl SimpleMapBuilder {
 
             apply_room(&mut self.map, &new_room);
 
-            if !self.map.rooms.is_empty() {
+            if !self.rooms.is_empty() {
                 let (new_x, new_y) = new_room.center();
-                let (prev_x, prev_y) = self.map.rooms.last().unwrap().center();
+                let (prev_x, prev_y) = self.rooms.last().unwrap().center();
 
                 if rng.range(0, 2) == 1 {
                     apply_horizontal_tunnel(&mut self.map, prev_x, new_x, prev_y);
@@ -61,16 +62,16 @@ impl SimpleMapBuilder {
                 }
             }
 
-            self.map.rooms.push(new_room);
+            self.rooms.push(new_room);
         }
 
-        let stairs_position = self.map.rooms.last().unwrap().center();
+        let stairs_position = self.rooms.last().unwrap().center();
         let stairs_idx = self.map.xy_idx(stairs_position.0, stairs_position.1);
 
         self.map.tiles[stairs_idx] = TileType::DownStairs;
 
         // Start position
-        let (x, y) = self.map.rooms.first().unwrap().center();
+        let (x, y) = self.rooms.first().unwrap().center();
 
         self.starting_position = Position { x, y }
     }
@@ -82,7 +83,7 @@ impl MapBuilder for SimpleMapBuilder {
     }
 
     fn spawn_entities(&self, ecs: &mut World) {
-        for room in self.map.rooms.iter().skip(1) {
+        for room in self.rooms.iter().skip(1) {
             spawner::spawn_room(ecs, room, self.depth);
         }
     }

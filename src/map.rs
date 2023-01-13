@@ -3,8 +3,6 @@ use serde::{Deserialize, Serialize};
 use specs::prelude::*;
 use std::collections::HashSet;
 
-use crate::rect::Rect;
-
 #[derive(PartialEq, Copy, Clone, Serialize, Deserialize)]
 pub enum TileType {
     Wall,
@@ -15,7 +13,6 @@ pub enum TileType {
 #[derive(Default, Serialize, Deserialize, Clone)]
 pub struct Map {
     pub tiles: Vec<TileType>,
-    pub rooms: Vec<Rect>,
     pub width: i32,
     pub height: i32,
     pub revealed_tiles: Vec<bool>,
@@ -64,7 +61,6 @@ impl Map {
     pub fn new(new_depth: i32) -> Map {
         Map {
             tiles: vec![TileType::Wall; Map::LENGTH],
-            rooms: Vec::new(),
             width: Map::WIDTH as i32,
             height: Map::HEIGHT as i32,
             revealed_tiles: vec![false; Map::LENGTH],
