@@ -379,6 +379,7 @@ fn bear_trap(ecs: &mut World, x: i32, y: i32) {
         .with(Hidden {})
         .with(EntryTrigger {})
         .with(InflictsDamage { damage: 6 })
+        .with(SingleActivation {})
         .marked::<SimpleMarker<SerializeMe>>()
         .build();
 }

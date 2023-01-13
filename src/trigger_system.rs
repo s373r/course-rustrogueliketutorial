@@ -21,6 +21,7 @@ impl<'a> System<'a> for TriggerSystem {
         ReadStorage<'a, InflictsDamage>,
         WriteExpect<'a, ParticleBuilder>,
         WriteStorage<'a, SufferDamage>,
+        ReadStorage<'a, SingleActivation>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
@@ -36,9 +37,12 @@ impl<'a> System<'a> for TriggerSystem {
             inflicts_damage,
             mut particle_builder,
             mut inflict_damage,
+            single_activation,
         ) = data;
 
         // Iterate the entities that moved and their final position
+        let mut remove_entities = Vec::new();
+
         for (moved_entity, _, pos) in (&entities, &mut entity_moved, &position).join() {
             let idx = map.xy_idx(pos.x, pos.y);
 
@@ -59,6 +63,7 @@ impl<'a> System<'a> for TriggerSystem {
                     log.entries.push(format!("{} triggers!", &name.name));
                 }
 
+                // If the trap is damage inflicting, do it
                 if let Some(damage) = inflicts_damage.get(*entity_in_tile) {
                     particle_builder.request(
                         pos.x,
@@ -72,8 +77,18 @@ impl<'a> System<'a> for TriggerSystem {
                     SufferDamage::new_damage(&mut inflict_damage, moved_entity, damage.damage);
                 }
 
+                // If it is single activation, it needs to be removed
+                if single_activation.get(*entity_in_tile).is_some() {
+                    remove_entities.push(*entity_in_tile);
+                }
+
                 hidden.remove(*entity_in_tile); // The trap is no longer hidden
             }
+        }
+
+        // Remove any single activation traps
+        for trap in remove_entities.iter() {
+            entities.delete(*trap).expect("Unable to delete trap");
         }
 
         // Remove all entity movement markers
