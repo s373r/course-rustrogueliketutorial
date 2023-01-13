@@ -76,7 +76,7 @@ Open http://0.0.0.0:8000/
   - [📝 3.2. Bloodstains](https://bfnightly.bracketproductions.com/rustbook/chapter_17.html)
   - [📝 3.3. Particle Effects](https://bfnightly.bracketproductions.com/rustbook/chapter_18.html)
   - [📝 3.4. Hunger Clock](https://bfnightly.bracketproductions.com/rustbook/chapter_19.html)
-  - 🚧 3.5. Magic Mapping
+  - [📝 3.5. Magic Mapping](https://bfnightly.bracketproductions.com/rustbook/chapter_20.html)
   - 🚧 3.6. REX Paint Menu
   - 🚧 3.7. Simple Traps
 - 🚧 4. Section 3 - Generating Maps
