@@ -38,6 +38,8 @@ use crate::monster_ai_system::MonsterAI;
 use crate::player::*;
 use crate::visibility_system::*;
 
+const SHOW_MAPGEN_VISUALIZER: bool = true;
+
 #[derive(PartialEq, Copy, Clone)]
 pub enum RunState {
     AwaitingInput,

@@ -6,13 +6,14 @@ use crate::map::{Map, TileType};
 use crate::map_builders::common::{apply_horizontal_tunnel, apply_room, apply_vertical_tunnel};
 use crate::map_builders::MapBuilder;
 use crate::rect::Rect;
-use crate::spawner;
+use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
 
 pub struct SimpleMapBuilder {
     map: Map,
     starting_position: Position,
     depth: i32,
     rooms: Vec<Rect>,
+    history: Vec<Map>,
 }
 
 impl SimpleMapBuilder {
@@ -22,6 +23,7 @@ impl SimpleMapBuilder {
             starting_position: Position { x: 0, y: 0 },
             depth: new_depth,
             rooms: Vec::new(),
+            history: Vec::new(),
         }
     }
 
@@ -49,6 +51,8 @@ impl SimpleMapBuilder {
 
             apply_room(&mut self.map, &new_room);
 
+            self.take_snapshot();
+
             if !self.rooms.is_empty() {
                 let (new_x, new_y) = new_room.center();
                 let (prev_x, prev_y) = self.rooms.last().unwrap().center();
@@ -63,6 +67,8 @@ impl SimpleMapBuilder {
             }
 
             self.rooms.push(new_room);
+
+            self.take_snapshot();
         }
 
         let stairs_position = self.rooms.last().unwrap().center();
@@ -94,5 +100,21 @@ impl MapBuilder for SimpleMapBuilder {
 
     fn get_starting_position(&self) -> Position {
         self.starting_position.clone()
+    }
+
+    fn get_snapshot_history(&self) -> Vec<Map> {
+        self.history.clone()
+    }
+
+    fn take_snapshot(&mut self) {
+        if !SHOW_MAPGEN_VISUALIZER {
+            return;
+        }
+
+        let mut snapshot = self.map.clone();
+
+        snapshot.revealed_tiles.fill(true);
+
+        self.history.push(snapshot);
     }
 }
