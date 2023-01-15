@@ -62,10 +62,16 @@ pub enum RunState {
     MagicMapReveal {
         row: i32,
     },
+    MapGeneration,
 }
 
 pub struct State {
     pub ecs: World,
+
+    mapgen_next_state: Option<RunState>,
+    mapgen_history: Vec<Map>,
+    mapgen_index: usize,
+    mapgen_timer: f32,
 }
 
 impl State {
@@ -207,9 +213,16 @@ impl State {
     }
 
     fn generate_world_map(&mut self, new_depth: i32) {
+        self.mapgen_index = 0;
+        self.mapgen_timer = 0.0;
+        // NOTE(DP): we do not need clear() since reassignment later
+        // self.mapgen_history.clear();
+
         let mut builder = map_builders::random_builder(new_depth);
 
         builder.build_map();
+
+        self.mapgen_history = builder.get_snapshot_history();
 
         let player_start = {
             let mut map_resource = self.ecs.write_resource::<Map>();
@@ -257,7 +270,7 @@ impl GameState for State {
         match run_state {
             RunState::MainMenu { .. } | RunState::GameOver { .. } => {}
             _ => {
-                draw_map(&self.ecs, ctx);
+                draw_map(&self.ecs.fetch::<Map>(), ctx);
 
                 let positions = self.ecs.read_storage::<Position>();
                 let renderables = self.ecs.read_storage::<Renderable>();
@@ -459,6 +472,26 @@ impl GameState for State {
                     RunState::MagicMapReveal { row: row + 1 }
                 }
             }
+            RunState::MapGeneration => {
+                let need_to_show_generation =
+                    !SHOW_MAPGEN_VISUALIZER || self.mapgen_index >= self.mapgen_history.len();
+
+                if need_to_show_generation {
+                    self.mapgen_next_state.unwrap()
+                } else {
+                    ctx.cls();
+                    draw_map(&self.mapgen_history[self.mapgen_index], ctx);
+
+                    self.mapgen_timer += ctx.frame_time_ms;
+
+                    if self.mapgen_timer > 300.0 {
+                        self.mapgen_timer = 0.0;
+                        self.mapgen_index += 1;
+                    }
+
+                    run_state
+                }
+            }
         };
 
         {
@@ -481,7 +514,15 @@ fn main() -> rltk::BError {
     // NOTE(DP): disable the scan lines effect
     // context.with_post_scanlines(true);
 
-    let mut gs = State { ecs: World::new() };
+    let mut gs = State {
+        ecs: World::new(),
+        mapgen_next_state: Some(RunState::MainMenu {
+            menu_selection: gui::MainMenuSelection::NewGame,
+        }),
+        mapgen_index: 0,
+        mapgen_history: Vec::new(),
+        mapgen_timer: 0.0,
+    };
 
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();
@@ -532,9 +573,7 @@ fn main() -> rltk::BError {
     gs.ecs.insert(player_entity);
     gs.ecs.insert(particle_system::ParticleBuilder::new());
     gs.ecs.insert(rex_assets::RexAssets::new());
-    gs.ecs.insert(RunState::MainMenu {
-        menu_selection: gui::MainMenuSelection::NewGame,
-    });
+    gs.ecs.insert(RunState::MapGeneration);
 
     gs.generate_world_map(1);
 
