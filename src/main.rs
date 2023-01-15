@@ -252,9 +252,9 @@ impl GameState for State {
         ctx.cls();
         particle_system::cull_dead_particles(&mut self.ecs, ctx);
 
-        let mut new_run_state = *self.ecs.fetch::<RunState>();
+        let run_state = *self.ecs.fetch::<RunState>();
 
-        match new_run_state {
+        match run_state {
             RunState::MainMenu { .. } | RunState::GameOver { .. } => {}
             _ => {
                 draw_map(&self.ecs, ctx);
@@ -284,7 +284,7 @@ impl GameState for State {
             }
         }
 
-        new_run_state = match new_run_state {
+        let new_run_state = match run_state {
             RunState::PreRun => {
                 self.run_systems();
                 RunState::AwaitingInput
@@ -307,7 +307,7 @@ impl GameState for State {
 
                 match result.0 {
                     gui::ItemMenuResult::Cancel => RunState::AwaitingInput,
-                    gui::ItemMenuResult::NoResponse => new_run_state,
+                    gui::ItemMenuResult::NoResponse => run_state,
                     gui::ItemMenuResult::Selected => {
                         let item_entity = result.1.unwrap();
                         let ranged_storage = self.ecs.read_storage::<Ranged>();
@@ -341,7 +341,7 @@ impl GameState for State {
 
                 match result.0 {
                     gui::ItemMenuResult::Cancel => RunState::AwaitingInput,
-                    gui::ItemMenuResult::NoResponse => new_run_state,
+                    gui::ItemMenuResult::NoResponse => run_state,
                     gui::ItemMenuResult::Selected => {
                         let item_entity = result.1.unwrap();
                         let mut intent = self.ecs.write_storage::<WantsToDropItem>();
@@ -362,7 +362,7 @@ impl GameState for State {
 
                 match item_menu_result {
                     gui::ItemMenuResult::Cancel => RunState::AwaitingInput,
-                    gui::ItemMenuResult::NoResponse => new_run_state,
+                    gui::ItemMenuResult::NoResponse => run_state,
                     gui::ItemMenuResult::Selected => {
                         let mut intent = self.ecs.write_storage::<WantsToUseItem>();
 
@@ -415,7 +415,7 @@ impl GameState for State {
 
                 match result.0 {
                     gui::ItemMenuResult::Cancel => RunState::AwaitingInput,
-                    gui::ItemMenuResult::NoResponse => new_run_state,
+                    gui::ItemMenuResult::NoResponse => run_state,
                     gui::ItemMenuResult::Selected => {
                         let item_entity = result.1.unwrap();
                         let mut intent = self.ecs.write_storage::<WantsToRemoveItem>();
@@ -434,7 +434,7 @@ impl GameState for State {
             RunState::GameOver => {
                 let result = gui::game_over(ctx);
                 match result {
-                    gui::GameOverResult::NoSelection => new_run_state,
+                    gui::GameOverResult::NoSelection => run_state,
                     gui::GameOverResult::QuitToMenu => {
                         self.game_over_cleanup();
 
