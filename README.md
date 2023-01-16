@@ -83,7 +83,7 @@ Open http://0.0.0.0:8000/
   - [📝 4.1. Refactor Map Building](https://bfnightly.bracketproductions.com/rustbook/chapter_23.html)
   - [📝 4.2. Map Building Test Harness](https://bfnightly.bracketproductions.com/rustbook/chapter_24.html)
   - [📝 4.3. BSP Room Dungeons](https://bfnightly.bracketproductions.com/rustbook/chapter_25.html)
-  - 🚧 4.4. BSP Interior Design
+  - [📝 4.4. BSP Interior Design](https://bfnightly.bracketproductions.com/rustbook/chapter_26.html)
   - 🚧 4.5. Cellular Automata Maps
   - 🚧 4.6. Drunkard's Walk Maps
   - 🚧 4.7. Mazes and Labyrinths
