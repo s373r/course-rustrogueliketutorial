@@ -229,9 +229,9 @@ impl MapBuilder for BspDungeonBuilder {
         }
 
         let mut snapshot = self.map.clone();
-        for v in snapshot.revealed_tiles.iter_mut() {
-            *v = true;
-        }
+
+        snapshot.revealed_tiles.fill(true);
+
         self.history.push(snapshot);
     }
 }
