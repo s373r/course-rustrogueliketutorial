@@ -1,5 +1,6 @@
 mod bsp_dungeon;
 mod bsp_interior;
+mod cellular_automata;
 mod common;
 mod simple_map;
 
@@ -10,6 +11,7 @@ use crate::components::Position;
 use crate::map::Map;
 use crate::map_builders::bsp_dungeon::BspDungeonBuilder;
 use crate::map_builders::bsp_interior::BspInteriorBuilder;
+use crate::map_builders::cellular_automata::CellularAutomataBuilder;
 use crate::map_builders::simple_map::SimpleMapBuilder;
 
 pub trait MapBuilder {
@@ -22,12 +24,15 @@ pub trait MapBuilder {
 }
 
 pub fn random_builder(new_depth: i32) -> Box<dyn MapBuilder> {
-    let mut rng = RandomNumberGenerator::new();
-    let builder = rng.roll_dice(1, 3);
+    // NOTE(DP): temporary commented
+    // let mut rng = RandomNumberGenerator::new();
+    // let builder = rng.roll_dice(1, 3);
+    //
+    // match builder {
+    //     1 => Box::new(BspDungeonBuilder::new(new_depth)),
+    //     2 => Box::new(BspInteriorBuilder::new(new_depth)),
+    //     _ => Box::new(SimpleMapBuilder::new(new_depth)),
+    // }
 
-    match builder {
-        1 => Box::new(BspDungeonBuilder::new(new_depth)),
-        2 => Box::new(BspInteriorBuilder::new(new_depth)),
-        _ => Box::new(SimpleMapBuilder::new(new_depth)),
-    }
+    Box::new(CellularAutomataBuilder::new(new_depth))
 }
