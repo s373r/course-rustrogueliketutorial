@@ -124,5 +124,23 @@ impl CellularAutomataBuilder {
 
             self.take_snapshot();
         }
+
+        // Find a starting point; start at the middle and walk left until we find an open tile
+        self.starting_position = Position {
+            x: self.map.width / 2,
+            y: self.map.height / 2,
+        };
+
+        let mut start_idx = self
+            .map
+            .xy_idx(self.starting_position.x, self.starting_position.y);
+
+        while self.map.tiles[start_idx] != TileType::Floor {
+            self.starting_position.x -= 1;
+
+            start_idx = self
+                .map
+                .xy_idx(self.starting_position.x, self.starting_position.y);
+        }
     }
 }
