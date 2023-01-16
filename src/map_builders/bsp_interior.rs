@@ -2,10 +2,12 @@ use rltk::RandomNumberGenerator;
 use specs::prelude::*;
 
 use crate::components::Position;
-use crate::map::Map;
+use crate::map::{Map, TileType};
 use crate::map_builders::MapBuilder;
 use crate::rect::Rect;
 use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
+
+const MIN_ROOM_SIZE: i32 = 8;
 
 pub struct BspInteriorBuilder {
     map: Map,
@@ -17,6 +19,16 @@ pub struct BspInteriorBuilder {
 }
 
 impl MapBuilder for BspInteriorBuilder {
+    fn build_map(&mut self) {
+        self.build();
+    }
+
+    fn spawn_entities(&self, ecs: &mut World) {
+        for room in self.rooms.iter().skip(1) {
+            spawner::spawn_room(ecs, room, self.depth);
+        }
+    }
+
     fn get_map(&self) -> Map {
         self.map.clone()
     }
@@ -27,16 +39,6 @@ impl MapBuilder for BspInteriorBuilder {
 
     fn get_snapshot_history(&self) -> Vec<Map> {
         self.history.clone()
-    }
-
-    fn build_map(&mut self) {
-        // We should do something here
-    }
-
-    fn spawn_entities(&self, ecs: &mut World) {
-        for room in self.rooms.iter().skip(1) {
-            spawner::spawn_room(ecs, room, self.depth);
-        }
     }
 
     fn take_snapshot(&mut self) {
@@ -61,6 +63,96 @@ impl BspInteriorBuilder {
             rooms: Vec::new(),
             history: Vec::new(),
             rects: Vec::new(),
+        }
+    }
+
+    fn build(&mut self) {
+        let mut rng = RandomNumberGenerator::new();
+
+        self.rects.clear();
+        self.rects
+            .push(Rect::new(1, 1, self.map.width - 2, self.map.height - 2)); // Start with a single map-sized rectangle
+
+        let first_room = self.rects[0];
+
+        self.add_subrects(first_room, &mut rng); // Divide the first room
+
+        for room in self.rects.clone().iter() {
+            // NOTE(DP): commented by the book author
+            //room.x2 -= 1;
+            //room.y2 -= 1;
+
+            self.rooms.push(*room);
+
+            for y in room.y1..room.y2 {
+                for x in room.x1..room.x2 {
+                    let idx = self.map.xy_idx(x, y);
+
+                    if self.map.is_valid_idx(idx) {
+                        self.map.tiles[idx] = TileType::Floor;
+                    }
+                }
+            }
+
+            self.take_snapshot();
+        }
+
+        let start = self.rooms[0].center();
+
+        self.starting_position = Position {
+            x: start.0,
+            y: start.1,
+        };
+    }
+
+    fn add_subrects(&mut self, rect: Rect, rng: &mut RandomNumberGenerator) {
+        // Remove the last rect from the list
+        if !self.rects.is_empty() {
+            self.rects.remove(self.rects.len() - 1);
+        }
+
+        // Calculate boundaries
+        let width = rect.weight();
+        let height = rect.height();
+        let half_width = width / 2;
+        let half_height = height / 2;
+
+        let split = rng.roll_dice(1, 4);
+
+        if split <= 2 {
+            // Horizontal split
+            let h1 = Rect::new(rect.x1, rect.y1, half_width - 1, height);
+
+            self.rects.push(h1);
+
+            if half_width > MIN_ROOM_SIZE {
+                self.add_subrects(h1, rng);
+            }
+
+            let h2 = Rect::new(rect.x1 + half_width, rect.y1, half_width, height);
+
+            self.rects.push(h2);
+
+            if half_width > MIN_ROOM_SIZE {
+                self.add_subrects(h2, rng);
+            }
+        } else {
+            // Vertical split
+            let v1 = Rect::new(rect.x1, rect.y1, width, half_height - 1);
+
+            self.rects.push(v1);
+
+            if half_height > MIN_ROOM_SIZE {
+                self.add_subrects(v1, rng);
+            }
+
+            let v2 = Rect::new(rect.x1, rect.y1 + half_height, width, half_height);
+
+            self.rects.push(v2);
+
+            if half_height > MIN_ROOM_SIZE {
+                self.add_subrects(v2, rng);
+            }
         }
     }
 }
