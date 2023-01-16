@@ -27,6 +27,7 @@ impl Rect {
         ((self.x1 + self.x2) / 2, (self.y1 + self.y2) / 2)
     }
 
+    // NOTE(DP): helper methods
     #[inline]
     pub fn weight(&self) -> i32 {
         i32::abs(self.x1 - self.x2)

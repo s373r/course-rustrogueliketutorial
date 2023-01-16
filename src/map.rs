@@ -32,15 +32,20 @@ impl Map {
     pub const LENGTH: usize = Map::HEIGHT * Map::WIDTH;
 
     pub fn xy_idx(&self, x: i32, y: i32) -> usize {
-        (y as usize * 80) + x as usize
+        (y as usize * Self::WIDTH) + x as usize
+    }
+
+    // NOTE(DP): helper method
+    pub fn is_valid_idx(&self, idx: usize) -> bool {
+        idx > 0 && idx < (Self::LENGTH - 1)
     }
 
     fn is_exit_valid(&self, x: i32, y: i32) -> bool {
-        if x < 1 || x > self.width - 1 || y < 1 || y > self.height - 1 {
+        let idx = self.xy_idx(x, y);
+
+        if !self.is_valid_idx(idx) {
             return false;
         }
-
-        let idx = self.xy_idx(x, y);
 
         !self.blocked[idx]
     }
