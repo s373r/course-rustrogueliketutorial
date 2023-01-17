@@ -39,6 +39,7 @@ use crate::player::*;
 use crate::visibility_system::*;
 
 const SHOW_MAPGEN_VISUALIZER: bool = true;
+const SHOW_MAP_AFTER_GENERATION: bool = false;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum RunState {
@@ -473,10 +474,14 @@ impl GameState for State {
                 }
             }
             RunState::MapGeneration => {
-                let need_to_show_generation =
+                let stop_map_generation_visualization =
                     !SHOW_MAPGEN_VISUALIZER || self.mapgen_index >= self.mapgen_history.len();
 
-                if need_to_show_generation {
+                if stop_map_generation_visualization {
+                    if SHOW_MAP_AFTER_GENERATION {
+                        draw_map(&self.mapgen_history[self.mapgen_index - 1], ctx);
+                    }
+
                     self.mapgen_next_state.unwrap()
                 } else {
                     ctx.cls();
@@ -514,11 +519,18 @@ fn main() -> rltk::BError {
     // NOTE(DP): disable the scan lines effect
     // context.with_post_scanlines(true);
 
+    // NOTE(DP): added to see generated map
+    let mapgen_next_state = Some(if SHOW_MAP_AFTER_GENERATION {
+        RunState::MapGeneration
+    } else {
+        RunState::MainMenu {
+            menu_selection: gui::MainMenuSelection::NewGame,
+        }
+    });
+
     let mut gs = State {
         ecs: World::new(),
-        mapgen_next_state: Some(RunState::MainMenu {
-            menu_selection: gui::MainMenuSelection::NewGame,
-        }),
+        mapgen_next_state,
         mapgen_index: 0,
         mapgen_history: Vec::new(),
         mapgen_timer: 0.0,
