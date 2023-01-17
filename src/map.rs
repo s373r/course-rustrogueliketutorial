@@ -41,11 +41,11 @@ impl Map {
     }
 
     fn is_exit_valid(&self, x: i32, y: i32) -> bool {
-        let idx = self.xy_idx(x, y);
-
-        if !self.is_valid_idx(idx) {
+        if x < 1 || x > self.width - 1 || y < 1 || y > self.height - 1 {
             return false;
         }
+
+        let idx = self.xy_idx(x, y);
 
         !self.blocked[idx]
     }
