@@ -143,7 +143,7 @@ pub fn draw_map(map: &Map, ctx: &mut Rltk) {
         if map.revealed_tiles[idx] {
             let (glyph, mut fg) = match tile {
                 TileType::Floor => (rltk::to_cp437('.'), RGB::from_f32(0.0, 0.5, 0.5)),
-                TileType::Wall => (wall_glyph(&map, x, y), RGB::from_f32(0., 1.0, 0.)),
+                TileType::Wall => (wall_glyph(map, x, y), RGB::from_f32(0., 1.0, 0.)),
                 TileType::DownStairs => (rltk::to_cp437('>'), RGB::from_f32(0., 1.0, 1.0)),
             };
 
