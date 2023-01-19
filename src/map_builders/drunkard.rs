@@ -105,8 +105,21 @@ impl DrunkardsWalkBuilder {
 
         while floor_tile_count < desired_floor_tiles {
             let mut did_something = false;
-            let mut drunk_x = self.starting_position.x;
-            let mut drunk_y = self.starting_position.y;
+            let (mut drunk_x, mut drunk_y) = match self.settings.spawn_mode {
+                DrunkSpawnMode::StartingPoint => {
+                    (self.starting_position.x, self.starting_position.y)
+                }
+                DrunkSpawnMode::Random => {
+                    if digger_count == 0 {
+                        (self.starting_position.x, self.starting_position.y)
+                    } else {
+                        (
+                            rng.roll_dice(1, self.map.width - 3) + 1,
+                            rng.roll_dice(1, self.map.height - 3) + 1,
+                        )
+                    }
+                }
+            };
             let mut drunk_life = 400;
 
             while drunk_life > 0 {

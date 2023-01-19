@@ -40,7 +40,7 @@ pub fn random_builder(new_depth: i32) -> Box<dyn MapBuilder> {
     Box::new(DrunkardsWalkBuilder::new(
         new_depth,
         DrunkardSettings {
-            spawn_mode: DrunkSpawnMode::StartingPoint,
+            spawn_mode: DrunkSpawnMode::Random,
         },
     ))
 }
