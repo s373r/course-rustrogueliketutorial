@@ -41,6 +41,7 @@ pub fn random_builder(new_depth: i32) -> Box<dyn MapBuilder> {
         new_depth,
         DrunkardSettings {
             spawn_mode: DrunkSpawnMode::Random,
+            drunken_lifetime: 100,
         },
     ))
 }
