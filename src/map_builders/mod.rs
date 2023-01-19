@@ -24,15 +24,13 @@ pub trait MapBuilder {
 }
 
 pub fn random_builder(new_depth: i32) -> Box<dyn MapBuilder> {
-    // NOTE(DP): temporary commented
-    // let mut rng = RandomNumberGenerator::new();
-    // let builder = rng.roll_dice(1, 3);
-    //
-    // match builder {
-    //     1 => Box::new(BspDungeonBuilder::new(new_depth)),
-    //     2 => Box::new(BspInteriorBuilder::new(new_depth)),
-    //     _ => Box::new(SimpleMapBuilder::new(new_depth)),
-    // }
+    let mut rng = RandomNumberGenerator::new();
+    let builder = rng.roll_dice(1, 4);
 
-    Box::new(CellularAutomataBuilder::new(new_depth))
+    match builder {
+        1 => Box::new(BspDungeonBuilder::new(new_depth)),
+        2 => Box::new(BspInteriorBuilder::new(new_depth)),
+        3 => Box::new(CellularAutomataBuilder::new(new_depth)),
+        _ => Box::new(SimpleMapBuilder::new(new_depth)),
+    }
 }
