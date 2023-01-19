@@ -79,6 +79,39 @@ impl DrunkardsWalkBuilder {
         }
     }
 
+    pub fn open_area(new_depth: i32) -> DrunkardsWalkBuilder {
+        Self::new(
+            new_depth,
+            DrunkardSettings {
+                spawn_mode: DrunkSpawnMode::StartingPoint,
+                drunken_lifetime: 400,
+                floor_percent: 0.5,
+            },
+        )
+    }
+
+    pub fn open_halls(new_depth: i32) -> DrunkardsWalkBuilder {
+        Self::new(
+            new_depth,
+            DrunkardSettings {
+                spawn_mode: DrunkSpawnMode::Random,
+                drunken_lifetime: 400,
+                floor_percent: 0.5,
+            },
+        )
+    }
+
+    pub fn winding_passages(new_depth: i32) -> DrunkardsWalkBuilder {
+        Self::new(
+            new_depth,
+            DrunkardSettings {
+                spawn_mode: DrunkSpawnMode::Random,
+                drunken_lifetime: 100,
+                floor_percent: 0.4,
+            },
+        )
+    }
+
     fn build(&mut self) {
         let mut rng = RandomNumberGenerator::new();
 
