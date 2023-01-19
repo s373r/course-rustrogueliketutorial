@@ -13,7 +13,7 @@ use crate::map::Map;
 use crate::map_builders::bsp_dungeon::BspDungeonBuilder;
 use crate::map_builders::bsp_interior::BspInteriorBuilder;
 use crate::map_builders::cellular_automata::CellularAutomataBuilder;
-use crate::map_builders::drunkard::DrunkardsWalkBuilder;
+use crate::map_builders::drunkard::{DrunkSpawnMode, DrunkardSettings, DrunkardsWalkBuilder};
 use crate::map_builders::simple_map::SimpleMapBuilder;
 
 pub trait MapBuilder {
@@ -37,5 +37,10 @@ pub fn random_builder(new_depth: i32) -> Box<dyn MapBuilder> {
     //     _ => Box::new(SimpleMapBuilder::new(new_depth)),
     // }
 
-    Box::new(DrunkardsWalkBuilder::new(new_depth))
+    Box::new(DrunkardsWalkBuilder::new(
+        new_depth,
+        DrunkardSettings {
+            spawn_mode: DrunkSpawnMode::StartingPoint,
+        },
+    ))
 }
