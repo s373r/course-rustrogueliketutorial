@@ -161,6 +161,7 @@ impl CellularAutomataBuilder {
 
             let distance_to_start = dijkstra_map.map[i];
 
+            // TODO(DP): this does not work -- unreachable cells have no f32::MAX value
             // We can't get to this tile - so we'll make it a wall
             if distance_to_start == f32::MAX {
                 *tile = TileType::Wall;
