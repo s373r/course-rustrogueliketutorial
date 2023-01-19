@@ -100,6 +100,7 @@ impl<'a> System<'a> for MonsterAI {
                 &*map,
             );
 
+            // TODO(DP): monsters are stuck near corridor exits (do not move diagonally)
             if path.success && path.steps.len() > 1 {
                 let mut idx = map.xy_idx(pos.x, pos.y);
 
