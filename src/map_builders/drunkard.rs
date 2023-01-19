@@ -1,4 +1,4 @@
-use rltk::RandomNumberGenerator;
+use rltk::{console, RandomNumberGenerator};
 use specs::prelude::*;
 use std::collections::HashMap;
 
@@ -65,102 +65,99 @@ impl DrunkardsWalkBuilder {
         }
     }
 
-    #[allow(clippy::map_entry)]
     fn build(&mut self) {
         let mut rng = RandomNumberGenerator::new();
 
-        // First we completely randomize the map, setting 55% of it to be floor.
-        for y in 1..self.map.height - 1 {
-            for x in 1..self.map.width - 1 {
-                let roll = rng.roll_dice(1, 100);
-                let idx = self.map.xy_idx(x, y);
-
-                if roll > 55 {
-                    self.map.tiles[idx] = TileType::Floor
-                } else {
-                    self.map.tiles[idx] = TileType::Wall
-                }
-            }
-        }
-
-        self.take_snapshot();
-
-        // Now we iteratively apply cellular automata rules
-        for _ in 0..15 {
-            let mut new_tiles = self.map.tiles.clone();
-
-            for y in 1..self.map.height - 1 {
-                for x in 1..self.map.width - 1 {
-                    let idx = self.map.xy_idx(x, y);
-                    let mut neighbors = 0;
-
-                    if self.map.tiles[idx - 1] == TileType::Wall {
-                        neighbors += 1;
-                    }
-                    if self.map.tiles[idx + 1] == TileType::Wall {
-                        neighbors += 1;
-                    }
-                    if self.map.tiles[idx - self.map.width as usize] == TileType::Wall {
-                        neighbors += 1;
-                    }
-                    if self.map.tiles[idx + self.map.width as usize] == TileType::Wall {
-                        neighbors += 1;
-                    }
-                    if self.map.tiles[idx - (self.map.width as usize - 1)] == TileType::Wall {
-                        neighbors += 1;
-                    }
-                    if self.map.tiles[idx - (self.map.width as usize + 1)] == TileType::Wall {
-                        neighbors += 1;
-                    }
-                    if self.map.tiles[idx + (self.map.width as usize - 1)] == TileType::Wall {
-                        neighbors += 1;
-                    }
-                    if self.map.tiles[idx + (self.map.width as usize + 1)] == TileType::Wall {
-                        neighbors += 1;
-                    }
-
-                    if neighbors > 4 || neighbors == 0 {
-                        new_tiles[idx] = TileType::Wall;
-                    } else {
-                        new_tiles[idx] = TileType::Floor;
-                    }
-                }
-            }
-
-            self.map.tiles = new_tiles;
-
-            self.take_snapshot();
-        }
-
-        // Find a starting point; start at the middle and walk left until we find an open tile
+        // Set a central starting point
         self.starting_position = Position {
             x: self.map.width / 2,
             y: self.map.height / 2,
         };
 
-        let mut start_idx = self
+        let start_idx = self
             .map
             .xy_idx(self.starting_position.x, self.starting_position.y);
 
-        while self.map.tiles[start_idx] != TileType::Floor {
-            self.starting_position.x -= 1;
+        self.map.tiles[start_idx] = TileType::Floor;
 
-            start_idx = self
+        let total_tiles = self.map.width * self.map.height;
+        let desired_floor_tiles = (total_tiles / 2) as usize;
+        let mut floor_tile_count = self
+            .map
+            .tiles
+            .iter()
+            .filter(|a| **a == TileType::Floor)
+            .count();
+        let mut digger_count = 0;
+        let mut active_digger_count = 0;
+
+        while floor_tile_count < desired_floor_tiles {
+            let mut did_something = false;
+            let mut drunk_x = self.starting_position.x;
+            let mut drunk_y = self.starting_position.y;
+            let mut drunk_life = 400;
+
+            while drunk_life > 0 {
+                let drunk_idx = self.map.xy_idx(drunk_x, drunk_y);
+
+                if self.map.tiles[drunk_idx] == TileType::Wall {
+                    did_something = true;
+                }
+
+                self.map.tiles[drunk_idx] = TileType::DownStairs;
+
+                let stagger_direction = rng.roll_dice(1, 4);
+
+                match stagger_direction {
+                    1 => {
+                        if drunk_x > 2 {
+                            drunk_x -= 1;
+                        }
+                    }
+                    2 => {
+                        if drunk_x < self.map.width - 2 {
+                            drunk_x += 1;
+                        }
+                    }
+                    3 => {
+                        if drunk_y > 2 {
+                            drunk_y -= 1;
+                        }
+                    }
+                    _ => {
+                        if drunk_y < self.map.height - 2 {
+                            drunk_y += 1;
+                        }
+                    }
+                }
+
+                drunk_life -= 1;
+            }
+
+            if did_something {
+                self.take_snapshot();
+
+                active_digger_count += 1;
+            }
+
+            digger_count += 1;
+
+            for tile in self.map.tiles.iter_mut() {
+                if *tile == TileType::DownStairs {
+                    *tile = TileType::Floor;
+                }
+            }
+
+            floor_tile_count = self
                 .map
-                .xy_idx(self.starting_position.x, self.starting_position.y);
+                .tiles
+                .iter()
+                .filter(|a| **a == TileType::Floor)
+                .count();
         }
 
-        // Find all tiles we can reach from the starting point
-        let exit_tile = remove_unreachable_areas_returning_most_distant(&mut self.map, start_idx);
-
-        self.take_snapshot();
-
-        // Place the stairs
-        self.map.tiles[exit_tile] = TileType::DownStairs;
-
-        self.take_snapshot();
-
-        // Now we build a noise map for use in spawning entities later
-        self.noise_areas = generate_voronoi_spawn_regions(&self.map, &mut rng);
+        console::log(format!(
+            "{digger_count} dwarves gave up their sobriety, of whom {active_digger_count} actually found a wall."
+        ));
     }
 }
