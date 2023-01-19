@@ -86,7 +86,7 @@ Open http://0.0.0.0:8000/
   - [📝 4.4. BSP Interior Design](https://bfnightly.bracketproductions.com/rustbook/chapter_26.html)
   - [📝 4.5. Cellular Automata Maps](https://bfnightly.bracketproductions.com/rustbook/chapter_27.html)
   - [📝 4.6. Drunkard's Walk Maps](https://bfnightly.bracketproductions.com/rustbook/chapter_28.html)
-  - 🚧 4.7. Mazes and Labyrinths
+  - [📝 4.7. Mazes and Labyrinths](https://bfnightly.bracketproductions.com/rustbook/chapter_29.html)
   - 🚧 4.8. Diffusion-limited aggregation maps
   - 🚧 4.9. Add symmetry and brushes to the library
   - 🚧 4.10. Voronoi Hive Maps
