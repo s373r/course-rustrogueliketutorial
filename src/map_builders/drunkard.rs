@@ -19,6 +19,7 @@ pub enum DrunkSpawnMode {
 pub struct DrunkardSettings {
     pub spawn_mode: DrunkSpawnMode,
     pub drunken_lifetime: i32,
+    pub floor_percent: f32,
 }
 
 pub struct DrunkardsWalkBuilder {
@@ -94,7 +95,7 @@ impl DrunkardsWalkBuilder {
         self.map.tiles[start_idx] = TileType::Floor;
 
         let total_tiles = self.map.width * self.map.height;
-        let desired_floor_tiles = (total_tiles / 2) as usize;
+        let desired_floor_tiles = (self.settings.floor_percent * total_tiles as f32) as usize;
         let mut floor_tile_count = self
             .map
             .tiles
