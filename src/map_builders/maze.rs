@@ -223,6 +223,9 @@ impl<'a> Grid<'a> {
     }
 
     fn generate_maze(&mut self, generator: &mut MazeBuilder) {
+        // NOTE(DP): for generation speed-up
+        let mut i = 0;
+
         loop {
             self.cells[self.current].visited = true;
 
@@ -247,6 +250,10 @@ impl<'a> Grid<'a> {
                 }
                 None => {
                     if self.backtrace.is_empty() {
+                        // NOTE(DP): to save the latest state
+                        self.copy_to_map(&mut generator.map);
+                        generator.take_snapshot();
+
                         break;
                     }
 
@@ -255,9 +262,12 @@ impl<'a> Grid<'a> {
                 }
             }
 
-            self.copy_to_map(&mut generator.map);
+            if i % 50 == 0 {
+                self.copy_to_map(&mut generator.map);
+                generator.take_snapshot();
+            }
 
-            generator.take_snapshot();
+            i += 1;
         }
     }
 
