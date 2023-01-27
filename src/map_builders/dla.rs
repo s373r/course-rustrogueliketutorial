@@ -8,6 +8,8 @@ use crate::map_builders::common::*;
 use crate::map_builders::MapBuilder;
 use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
 
+const MAP_GENERATION_SAVE_AFTER_SNAPSHOTS_COUNT: i32 = 25;
+
 #[derive(PartialEq, Copy, Clone)]
 pub enum DLAAlgorithm {
     WalkInwards,
@@ -81,6 +83,7 @@ impl DLABuilder {
             .iter()
             .filter(|a| **a == TileType::Floor)
             .count();
+        let mut i = 0;
 
         while floor_tile_count < desired_floor_tiles {
             match self.algorithm {
@@ -187,7 +190,11 @@ impl DLABuilder {
                 }
             }
 
-            self.take_snapshot();
+            if i % MAP_GENERATION_SAVE_AFTER_SNAPSHOTS_COUNT == 0 {
+                self.take_snapshot();
+            }
+
+            i += 1;
 
             floor_tile_count = self
                 .map
@@ -196,6 +203,8 @@ impl DLABuilder {
                 .filter(|a| **a == TileType::Floor)
                 .count();
         }
+
+        self.take_snapshot();
 
         // Find all tiles we can reach from the starting point
         let exit_tile = remove_unreachable_areas_returning_most_distant(&mut self.map, start_idx);
