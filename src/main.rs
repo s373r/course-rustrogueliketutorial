@@ -479,7 +479,13 @@ impl GameState for State {
 
                 if stop_map_generation_visualization {
                     if SHOW_MAP_AFTER_GENERATION {
-                        draw_map(&self.mapgen_history[self.mapgen_index - 1], ctx);
+                        let mut map = self.ecs.fetch_mut::<Map>();
+
+                        map.revealed_tiles.fill(true);
+
+                        draw_map(&map, ctx);
+
+                        map.revealed_tiles.fill(false);
                     }
 
                     self.mapgen_next_state.unwrap()
