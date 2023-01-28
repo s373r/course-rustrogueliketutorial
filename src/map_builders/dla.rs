@@ -38,16 +38,47 @@ pub struct DLABuilder {
 }
 
 impl DLABuilder {
-    pub fn new(new_depth: i32) -> DLABuilder {
+    pub fn walk_inwards(new_depth: i32) -> DLABuilder {
+        Self::new(new_depth, DLAAlgorithm::WalkInwards, 1, DLASymmetry::None)
+    }
+
+    pub fn walk_outwards(new_depth: i32) -> DLABuilder {
+        Self::new(new_depth, DLAAlgorithm::WalkOutwards, 2, DLASymmetry::None)
+    }
+
+    pub fn central_attractor(new_depth: i32) -> DLABuilder {
+        Self::new(
+            new_depth,
+            DLAAlgorithm::CentralAttractor,
+            2,
+            DLASymmetry::None,
+        )
+    }
+
+    pub fn insectoid(new_depth: i32) -> DLABuilder {
+        Self::new(
+            new_depth,
+            DLAAlgorithm::CentralAttractor,
+            2,
+            DLASymmetry::Horizontal,
+        )
+    }
+
+    fn new(
+        new_depth: i32,
+        algorithm: DLAAlgorithm,
+        brush_size: i32,
+        symmetry: DLASymmetry,
+    ) -> DLABuilder {
         DLABuilder {
             map: Map::new(new_depth),
             starting_position: Position { x: 0, y: 0 },
             depth: new_depth,
             history: Vec::new(),
             noise_areas: HashMap::new(),
-            algorithm: DLAAlgorithm::WalkInwards,
-            brush_size: 1,
-            symmetry: DLASymmetry::None,
+            algorithm,
+            brush_size,
+            symmetry,
             floor_percent: 0.25,
         }
     }
