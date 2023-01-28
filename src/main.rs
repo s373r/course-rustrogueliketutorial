@@ -38,7 +38,7 @@ use crate::monster_ai_system::MonsterAI;
 use crate::player::*;
 use crate::visibility_system::*;
 
-const SHOW_MAPGEN_VISUALIZER: bool = true;
+const SHOW_MAPGEN_VISUALIZER: bool = false;
 const SHOW_MAP_AFTER_GENERATION: bool = false;
 
 #[derive(PartialEq, Copy, Clone)]
