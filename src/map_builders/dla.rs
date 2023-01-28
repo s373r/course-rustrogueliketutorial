@@ -17,14 +17,6 @@ pub enum DLAAlgorithm {
     CentralAttractor,
 }
 
-#[derive(PartialEq, Copy, Clone)]
-pub enum DLASymmetry {
-    None,
-    Horizontal,
-    Vertical,
-    Both,
-}
-
 pub struct DLABuilder {
     map: Map,
     starting_position: Position,
@@ -33,26 +25,21 @@ pub struct DLABuilder {
     noise_areas: HashMap<i32, Vec<usize>>,
     algorithm: DLAAlgorithm,
     brush_size: i32,
-    symmetry: DLASymmetry,
+    symmetry: Symmetry,
     floor_percent: f32,
 }
 
 impl DLABuilder {
     pub fn walk_inwards(new_depth: i32) -> DLABuilder {
-        Self::new(new_depth, DLAAlgorithm::WalkInwards, 1, DLASymmetry::None)
+        Self::new(new_depth, DLAAlgorithm::WalkInwards, 1, Symmetry::None)
     }
 
     pub fn walk_outwards(new_depth: i32) -> DLABuilder {
-        Self::new(new_depth, DLAAlgorithm::WalkOutwards, 2, DLASymmetry::None)
+        Self::new(new_depth, DLAAlgorithm::WalkOutwards, 2, Symmetry::None)
     }
 
     pub fn central_attractor(new_depth: i32) -> DLABuilder {
-        Self::new(
-            new_depth,
-            DLAAlgorithm::CentralAttractor,
-            2,
-            DLASymmetry::None,
-        )
+        Self::new(new_depth, DLAAlgorithm::CentralAttractor, 2, Symmetry::None)
     }
 
     pub fn insectoid(new_depth: i32) -> DLABuilder {
@@ -60,7 +47,7 @@ impl DLABuilder {
             new_depth,
             DLAAlgorithm::CentralAttractor,
             2,
-            DLASymmetry::Horizontal,
+            Symmetry::Horizontal,
         )
     }
 
@@ -68,7 +55,7 @@ impl DLABuilder {
         new_depth: i32,
         algorithm: DLAAlgorithm,
         brush_size: i32,
-        symmetry: DLASymmetry,
+        symmetry: Symmetry,
     ) -> DLABuilder {
         DLABuilder {
             map: Map::new(new_depth),
@@ -157,7 +144,13 @@ impl DLABuilder {
                         digger_idx = self.map.xy_idx(digger_x, digger_y);
                     }
 
-                    self.paint(prev_x, prev_y);
+                    paint(
+                        &mut self.map,
+                        self.symmetry,
+                        self.brush_size,
+                        prev_x,
+                        prev_y,
+                    );
                 }
                 DLAAlgorithm::WalkOutwards => {
                     let mut digger_x = self.starting_position.x;
@@ -193,7 +186,13 @@ impl DLABuilder {
                         digger_idx = self.map.xy_idx(digger_x, digger_y);
                     }
 
-                    self.paint(digger_x, digger_y);
+                    paint(
+                        &mut self.map,
+                        self.symmetry,
+                        self.brush_size,
+                        digger_x,
+                        digger_y,
+                    );
                 }
                 DLAAlgorithm::CentralAttractor => {
                     let mut digger_x = rng.roll_dice(1, self.map.width - 3) + 1;
@@ -217,7 +216,13 @@ impl DLABuilder {
                         digger_idx = self.map.xy_idx(digger_x, digger_y);
                     }
 
-                    self.paint(prev_x, prev_y);
+                    paint(
+                        &mut self.map,
+                        self.symmetry,
+                        self.brush_size,
+                        prev_x,
+                        prev_y,
+                    );
                 }
             }
 
@@ -249,81 +254,6 @@ impl DLABuilder {
 
         // Now we build a noise map for use in spawning entities later
         self.noise_areas = generate_voronoi_spawn_regions(&self.map, &mut rng);
-    }
-
-    fn paint(&mut self, x: i32, y: i32) {
-        match self.symmetry {
-            DLASymmetry::None => self.apply_paint(x, y),
-            DLASymmetry::Horizontal => {
-                let center_x = self.map.width / 2;
-
-                if x == center_x {
-                    self.apply_paint(x, y);
-                } else {
-                    let dist_x = i32::abs(center_x - x);
-
-                    self.apply_paint(center_x + dist_x, y);
-                    self.apply_paint(center_x - dist_x, y);
-                }
-            }
-            DLASymmetry::Vertical => {
-                let center_y = self.map.height / 2;
-
-                if y == center_y {
-                    self.apply_paint(x, y);
-                } else {
-                    let dist_y = i32::abs(center_y - y);
-
-                    self.apply_paint(x, center_y + dist_y);
-                    self.apply_paint(x, center_y - dist_y);
-                }
-            }
-            DLASymmetry::Both => {
-                let center_x = self.map.width / 2;
-                let center_y = self.map.height / 2;
-
-                if x == center_x && y == center_y {
-                    self.apply_paint(x, y);
-                } else {
-                    let dist_x = i32::abs(center_x - x);
-
-                    self.apply_paint(center_x + dist_x, y);
-                    self.apply_paint(center_x - dist_x, y);
-
-                    let dist_y = i32::abs(center_y - y);
-
-                    self.apply_paint(x, center_y + dist_y);
-                    self.apply_paint(x, center_y - dist_y);
-                }
-            }
-        }
-    }
-
-    fn apply_paint(&mut self, x: i32, y: i32) {
-        match self.brush_size {
-            1 => {
-                let digger_idx = self.map.xy_idx(x, y);
-
-                self.map.tiles[digger_idx] = TileType::Floor;
-            }
-            _ => {
-                let half_brush_size = self.brush_size / 2;
-
-                for brush_y in y - half_brush_size..y + half_brush_size {
-                    for brush_x in x - half_brush_size..x + half_brush_size {
-                        if brush_x > 1
-                            && brush_x < self.map.width - 1
-                            && brush_y > 1
-                            && brush_y < self.map.height - 1
-                        {
-                            let idx = self.map.xy_idx(brush_x, brush_y);
-
-                            self.map.tiles[idx] = TileType::Floor;
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 
