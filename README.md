@@ -88,7 +88,7 @@ Open http://0.0.0.0:8000/
   - [📝 4.6. Drunkard's Walk Maps](https://bfnightly.bracketproductions.com/rustbook/chapter_28.html)
   - [📝 4.7. Mazes and Labyrinths](https://bfnightly.bracketproductions.com/rustbook/chapter_29.html)
   - [📝 4.8. Diffusion-limited aggregation maps](https://bfnightly.bracketproductions.com/rustbook/chapter_30.html)
-  - 🚧 4.9. Add symmetry and brushes to the library
+  - [📝 4.9. Add symmetry and brushes to the library](https://bfnightly.bracketproductions.com/rustbook/chapter_31.html)
   - 🚧 4.10. Voronoi Hive Maps
   - 🚧 4.11. Wave Function Collapse
   - 🚧 4.12. Prefabs & Sectionals
