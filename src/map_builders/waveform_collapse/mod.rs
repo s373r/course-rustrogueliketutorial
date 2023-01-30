@@ -1,6 +1,7 @@
 mod common;
 mod constraints;
 mod image_loader;
+mod solver;
 
 use rltk::RandomNumberGenerator;
 use specs::prelude::*;
@@ -12,6 +13,7 @@ use crate::map_builders::common::*;
 use crate::map_builders::waveform_collapse::common::{patterns_to_constraints, MapChunk};
 use crate::map_builders::waveform_collapse::constraints::{build_patterns, render_pattern_to_map};
 use crate::map_builders::waveform_collapse::image_loader::load_rex_map;
+use crate::map_builders::waveform_collapse::solver::Solver;
 use crate::map_builders::MapBuilder;
 use crate::{spawner, SHOW_MAPGEN_VISUALIZER, SHOW_MAP_AFTER_GENERATION};
 
@@ -86,6 +88,23 @@ impl WaveformCollapseBuilder {
         let constraints = patterns_to_constraints(patterns, CHUNK_SIZE);
 
         self.render_tile_gallery(&constraints, CHUNK_SIZE);
+
+        self.map = Map::new(self.depth);
+
+        loop {
+            let mut solver = Solver::new(constraints.clone(), CHUNK_SIZE, &self.map);
+            while !solver.iteration(&mut self.map, &mut rng) {
+                self.take_snapshot();
+            }
+
+            self.take_snapshot();
+
+            if solver.possible {
+                break;
+            }
+
+            // If it has hit an impossible condition, try again
+        }
 
         // Find a starting point; start at the middle and walk left until we find an open tile
         self.starting_position = Position {
