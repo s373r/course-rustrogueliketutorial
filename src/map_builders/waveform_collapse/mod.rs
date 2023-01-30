@@ -1,3 +1,5 @@
+mod image_loader;
+
 use rltk::RandomNumberGenerator;
 use specs::prelude::*;
 use std::collections::HashMap;
@@ -5,6 +7,7 @@ use std::collections::HashMap;
 use crate::components::Position;
 use crate::map::{Map, TileType};
 use crate::map_builders::common::*;
+use crate::map_builders::waveform_collapse::image_loader::load_rex_map;
 use crate::map_builders::MapBuilder;
 use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
 
@@ -66,7 +69,12 @@ impl WaveformCollapseBuilder {
     fn build(&mut self) {
         let mut rng = RandomNumberGenerator::new();
 
-        // TODO: Builder goes here
+        self.map = load_rex_map(
+            self.depth,
+            &rltk::rex::XpFile::from_resource("../resources/wfc-demo1.xp").unwrap(),
+        );
+
+        self.take_snapshot();
 
         // Find a starting point; start at the middle and walk left until we find an open tile
         self.starting_position = Position {
