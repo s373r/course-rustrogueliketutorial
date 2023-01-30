@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use crate::map::{Map, TileType};
+use crate::map_builders::waveform_collapse::common::MapChunk;
 
 pub fn build_patterns(
     map: &Map,
@@ -83,7 +84,7 @@ pub fn build_patterns(
 
 pub fn render_pattern_to_map(
     map: &mut Map,
-    pattern: &[TileType],
+    chunk: &MapChunk,
     chunk_size: i32,
     start_x: i32,
     start_y: i32,
@@ -94,9 +95,34 @@ pub fn render_pattern_to_map(
         for tile_x in 0..chunk_size {
             let map_idx = map.xy_idx(start_x + tile_x, start_y + tile_y);
 
-            map.tiles[map_idx] = pattern[i];
+            map.tiles[map_idx] = chunk.pattern[i];
             map.visible_tiles[map_idx] = true;
             i += 1;
+        }
+    }
+
+    for (x, northbound) in chunk.exits[0].iter().enumerate() {
+        if *northbound {
+            let map_idx = map.xy_idx(start_x + x as i32, start_y);
+            map.tiles[map_idx] = TileType::DownStairs;
+        }
+    }
+    for (x, southbound) in chunk.exits[1].iter().enumerate() {
+        if *southbound {
+            let map_idx = map.xy_idx(start_x + x as i32, start_y + chunk_size - 1);
+            map.tiles[map_idx] = TileType::DownStairs;
+        }
+    }
+    for (x, westbound) in chunk.exits[2].iter().enumerate() {
+        if *westbound {
+            let map_idx = map.xy_idx(start_x, start_y + x as i32);
+            map.tiles[map_idx] = TileType::DownStairs;
+        }
+    }
+    for (x, eastbound) in chunk.exits[3].iter().enumerate() {
+        if *eastbound {
+            let map_idx = map.xy_idx(start_x + chunk_size - 1, start_y + x as i32);
+            map.tiles[map_idx] = TileType::DownStairs;
         }
     }
 }

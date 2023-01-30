@@ -1,3 +1,4 @@
+mod common;
 mod constraints;
 mod image_loader;
 
@@ -8,6 +9,7 @@ use std::collections::HashMap;
 use crate::components::Position;
 use crate::map::{Map, TileType};
 use crate::map_builders::common::*;
+use crate::map_builders::waveform_collapse::common::{patterns_to_constraints, MapChunk};
 use crate::map_builders::waveform_collapse::constraints::{build_patterns, render_pattern_to_map};
 use crate::map_builders::waveform_collapse::image_loader::load_rex_map;
 use crate::map_builders::MapBuilder;
@@ -79,9 +81,11 @@ impl WaveformCollapseBuilder {
         self.take_snapshot();
 
         const CHUNK_SIZE: i32 = 7;
-        let patterns = build_patterns(&self.map, CHUNK_SIZE, true, true);
 
-        self.render_tile_gallery(&patterns, CHUNK_SIZE);
+        let patterns = build_patterns(&self.map, CHUNK_SIZE, true, true);
+        let constraints = patterns_to_constraints(patterns, CHUNK_SIZE);
+
+        self.render_tile_gallery(&constraints, CHUNK_SIZE);
 
         // Find a starting point; start at the middle and walk left until we find an open tile
         self.starting_position = Position {
@@ -118,7 +122,7 @@ impl WaveformCollapseBuilder {
         self.noise_areas = generate_voronoi_spawn_regions(&self.map, &mut rng);
     }
 
-    fn render_tile_gallery(&mut self, patterns: &Vec<Vec<TileType>>, chunk_size: i32) {
+    fn render_tile_gallery(&mut self, patterns: &Vec<MapChunk>, chunk_size: i32) {
         self.map = Map::new(0);
 
         let mut counter = 0;
