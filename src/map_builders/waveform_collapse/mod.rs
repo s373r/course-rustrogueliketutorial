@@ -11,7 +11,7 @@ use crate::map_builders::common::*;
 use crate::map_builders::waveform_collapse::constraints::{build_patterns, render_pattern_to_map};
 use crate::map_builders::waveform_collapse::image_loader::load_rex_map;
 use crate::map_builders::MapBuilder;
-use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
+use crate::{spawner, SHOW_MAPGEN_VISUALIZER, SHOW_MAP_AFTER_GENERATION};
 
 pub struct WaveformCollapseBuilder {
     map: Map,
@@ -100,8 +100,12 @@ impl WaveformCollapseBuilder {
 
         self.take_snapshot();
 
-        // Find all tiles we can reach from the starting point
-        let exit_tile = remove_unreachable_areas_returning_most_distant(&mut self.map, start_idx);
+        let exit_tile = if !SHOW_MAP_AFTER_GENERATION {
+            // Find all tiles we can reach from the starting point
+            remove_unreachable_areas_returning_most_distant(&mut self.map, start_idx)
+        } else {
+            0
+        };
 
         self.take_snapshot();
 
