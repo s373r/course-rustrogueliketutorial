@@ -1,3 +1,4 @@
+mod constraints;
 mod image_loader;
 
 use rltk::RandomNumberGenerator;
@@ -7,6 +8,7 @@ use std::collections::HashMap;
 use crate::components::Position;
 use crate::map::{Map, TileType};
 use crate::map_builders::common::*;
+use crate::map_builders::waveform_collapse::constraints::{build_patterns, render_pattern_to_map};
 use crate::map_builders::waveform_collapse::image_loader::load_rex_map;
 use crate::map_builders::MapBuilder;
 use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
@@ -71,10 +73,15 @@ impl WaveformCollapseBuilder {
 
         self.map = load_rex_map(
             self.depth,
-            &rltk::rex::XpFile::from_resource("../resources/wfc-demo1.xp").unwrap(),
+            &rltk::rex::XpFile::from_resource("../resources/wfc-demo2.xp").unwrap(),
         );
 
         self.take_snapshot();
+
+        const CHUNK_SIZE: i32 = 7;
+        let patterns = build_patterns(&self.map, CHUNK_SIZE, true, true);
+
+        self.render_tile_gallery(&patterns, CHUNK_SIZE);
 
         // Find a starting point; start at the middle and walk left until we find an open tile
         self.starting_position = Position {
@@ -105,5 +112,38 @@ impl WaveformCollapseBuilder {
 
         // Now we build a noise map for use in spawning entities later
         self.noise_areas = generate_voronoi_spawn_regions(&self.map, &mut rng);
+    }
+
+    fn render_tile_gallery(&mut self, patterns: &Vec<Vec<TileType>>, chunk_size: i32) {
+        self.map = Map::new(0);
+
+        let mut counter = 0;
+        let mut x = 1;
+        let mut y = 1;
+
+        while counter < patterns.len() {
+            render_pattern_to_map(&mut self.map, &patterns[counter], chunk_size, x, y);
+
+            x += chunk_size + 1;
+
+            if x + chunk_size > self.map.width {
+                // Move to the next row
+                x = 1;
+                y += chunk_size + 1;
+
+                if y + chunk_size > self.map.height {
+                    // Move to the next page
+                    self.take_snapshot();
+                    self.map = Map::new(0);
+
+                    x = 1;
+                    y = 1;
+                }
+            }
+
+            counter += 1;
+        }
+
+        self.take_snapshot();
     }
 }

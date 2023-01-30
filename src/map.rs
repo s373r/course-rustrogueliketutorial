@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use specs::prelude::*;
 use std::collections::HashSet;
 
-#[derive(PartialEq, Copy, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Hash, Copy, Clone, Serialize, Deserialize)]
 pub enum TileType {
     Wall,
     Floor,
