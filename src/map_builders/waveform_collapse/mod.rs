@@ -17,12 +17,20 @@ use crate::map_builders::waveform_collapse::solver::Solver;
 use crate::map_builders::MapBuilder;
 use crate::{spawner, SHOW_MAPGEN_VISUALIZER, SHOW_MAP_AFTER_GENERATION};
 
+#[derive(PartialEq, Copy, Clone)]
+pub enum WaveformMode {
+    TestMap,
+    Derived,
+}
+
 pub struct WaveformCollapseBuilder {
     map: Map,
     starting_position: Position,
     depth: i32,
     history: Vec<Map>,
     noise_areas: HashMap<i32, Vec<usize>>,
+    mode: WaveformMode,
+    derive_from: Option<Box<dyn MapBuilder>>,
 }
 
 impl MapBuilder for WaveformCollapseBuilder {
@@ -62,27 +70,57 @@ impl MapBuilder for WaveformCollapseBuilder {
 }
 
 impl WaveformCollapseBuilder {
-    pub fn new(new_depth: i32) -> WaveformCollapseBuilder {
+    fn new(
+        new_depth: i32,
+        mode: WaveformMode,
+        derive_from: Option<Box<dyn MapBuilder>>,
+    ) -> WaveformCollapseBuilder {
         WaveformCollapseBuilder {
             map: Map::new(new_depth),
             starting_position: Position { x: 0, y: 0 },
             depth: new_depth,
             history: Vec::new(),
             noise_areas: HashMap::new(),
+            mode,
+            derive_from,
         }
     }
 
+    pub fn test_map(new_depth: i32) -> WaveformCollapseBuilder {
+        WaveformCollapseBuilder::new(new_depth, WaveformMode::TestMap, None)
+    }
+
+    pub fn derived_map(new_depth: i32, builder: Box<dyn MapBuilder>) -> WaveformCollapseBuilder {
+        WaveformCollapseBuilder::new(new_depth, WaveformMode::Derived, Some(builder))
+    }
+
     fn build(&mut self) {
+        if self.mode == WaveformMode::TestMap {
+            self.map = load_rex_map(
+                self.depth,
+                &rltk::rex::XpFile::from_resource("../resources/wfc-demo1.xp").unwrap(),
+            );
+            self.take_snapshot();
+            return;
+        }
+
         let mut rng = RandomNumberGenerator::new();
 
-        self.map = load_rex_map(
-            self.depth,
-            &rltk::rex::XpFile::from_resource("../resources/wfc-demo2.xp").unwrap(),
-        );
+        const CHUNK_SIZE: i32 = 8;
+
+        let pre_builder = &mut self.derive_from.as_mut().unwrap();
+
+        pre_builder.build_map();
+
+        self.map = pre_builder.get_map();
+
+        for t in self.map.tiles.iter_mut() {
+            if *t == TileType::DownStairs {
+                *t = TileType::Floor;
+            }
+        }
 
         self.take_snapshot();
-
-        const CHUNK_SIZE: i32 = 7;
 
         let patterns = build_patterns(&self.map, CHUNK_SIZE, true, true);
         let constraints = patterns_to_constraints(patterns, CHUNK_SIZE);
