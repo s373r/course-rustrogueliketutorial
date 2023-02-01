@@ -5,6 +5,7 @@ mod common;
 mod dla;
 mod drunkard;
 mod maze;
+mod prefab_builder;
 mod simple_map;
 mod voronoi;
 mod waveform_collapse;
@@ -20,6 +21,7 @@ use crate::map_builders::cellular_automata::CellularAutomataBuilder;
 use crate::map_builders::dla::DLABuilder;
 use crate::map_builders::drunkard::DrunkardsWalkBuilder;
 use crate::map_builders::maze::MazeBuilder;
+use crate::map_builders::prefab_builder::PrefabBuilder;
 use crate::map_builders::simple_map::SimpleMapBuilder;
 use crate::map_builders::voronoi::VoronoiCellBuilder;
 use crate::map_builders::waveform_collapse::WaveformCollapseBuilder;
@@ -34,9 +36,7 @@ pub trait MapBuilder {
 }
 
 pub fn random_builder(new_depth: i32) -> Box<dyn MapBuilder> {
-    Box::new(waveform_collapse::prefab_builder::PrefabBuilder::new(
-        new_depth,
-    ))
+    Box::new(PrefabBuilder::new(new_depth))
 
     // TODO(DP): return after tests
     // let mut rng = RandomNumberGenerator::new();
