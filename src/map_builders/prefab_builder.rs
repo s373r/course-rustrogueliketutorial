@@ -28,9 +28,8 @@ impl MapBuilder for PrefabBuilder {
     }
 
     fn spawn_entities(&self, ecs: &mut World) {
-        // TODO(DP): destruct "entity" tuple
-        for entity in self.spawns.iter() {
-            spawner::spawn_entity(ecs, &(&entity.0, &entity.1));
+        for (map_idx, entity_name) in self.spawns.iter() {
+            spawner::spawn_entity(ecs, &(map_idx, entity_name));
         }
     }
 

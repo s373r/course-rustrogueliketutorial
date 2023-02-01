@@ -345,12 +345,11 @@ fn bear_trap(ecs: &mut World, x: i32, y: i32) {
 }
 
 /// Spawns a named entity (name in tuple.1) at the location in (tuple.0)
-// TODO(DP): destruct "entity" tuple
-pub fn spawn_entity(ecs: &mut World, spawn: &(&usize, &String)) {
-    let x = (*spawn.0 % Map::WIDTH) as i32;
-    let y = (*spawn.0 / Map::WIDTH) as i32;
+pub fn spawn_entity(ecs: &mut World, (map_idx, entity_name): &(&usize, &String)) {
+    let x = (*map_idx % Map::WIDTH) as i32;
+    let y = (*map_idx / Map::WIDTH) as i32;
 
-    match spawn.1.as_ref() {
+    match entity_name.as_ref() {
         "Goblin" => goblin(ecs, x, y),
         "Orc" => orc(ecs, x, y),
         "Health Potion" => health_potion(ecs, x, y),
