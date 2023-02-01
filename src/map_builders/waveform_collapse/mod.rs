@@ -1,5 +1,6 @@
 mod common;
 mod constraints;
+mod prefab_builder;
 mod solver;
 
 use rltk::RandomNumberGenerator;
