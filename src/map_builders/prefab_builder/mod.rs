@@ -23,6 +23,7 @@ pub enum PrefabMode {
     Sectional {
         section: prefab_sections::PrefabSection,
     },
+    RoomVaults,
 }
 
 pub struct PrefabBuilder {
@@ -32,8 +33,10 @@ pub struct PrefabBuilder {
     depth: i32,
     history: Vec<Map>,
     mode: PrefabMode,
+    // TODO(DP): extract into own type alias
     spawns: Vec<(usize, String)>,
     previous_builder: Option<Box<dyn MapBuilder>>,
+    spawn_list: Vec<(usize, String)>,
 }
 
 impl MapBuilder for PrefabBuilder {
@@ -79,11 +82,10 @@ impl PrefabBuilder {
             starting_position: Position { x: 0, y: 0 },
             depth: new_depth,
             history: Vec::new(),
-            mode: PrefabMode::Sectional {
-                section: prefab_sections::UNDERGROUND_FORT,
-            },
+            mode: PrefabMode::RoomVaults,
             spawns: Vec::new(),
             previous_builder,
+            spawn_list: Vec::new(),
         }
     }
 
@@ -180,6 +182,7 @@ impl PrefabBuilder {
             PrefabMode::RexLevel { template } => self.load_rex_map(template),
             PrefabMode::Constant { level } => self.load_ascii_map(&level),
             PrefabMode::Sectional { section } => self.apply_sectional(&section),
+            PrefabMode::RoomVaults => self.apply_room_vaults(),
         }
 
         // Find a starting point; start at the middle and walk left until we find an open tile
@@ -212,6 +215,29 @@ impl PrefabBuilder {
         }
     }
 
+    fn apply_previous_iteration<F>(&mut self, mut filter: F)
+    where
+        F: FnMut(i32, i32, &(usize, String)) -> bool,
+    {
+        // Build the map
+        let prev_builder = self.previous_builder.as_mut().unwrap();
+        prev_builder.build_map();
+
+        self.starting_position = prev_builder.get_starting_position();
+        self.map = prev_builder.get_map().clone();
+
+        for e in prev_builder.get_spawn_list().iter() {
+            let (map_idx, entity_name) = e;
+            let x = map_idx as i32 % self.map.width;
+            let y = map_idx as i32 / self.map.width;
+
+            if filter(x, y, e) {
+                self.spawn_list.push((map_idx, entity_name))
+            }
+        }
+        self.take_snapshot();
+    }
+
     fn apply_sectional(&mut self, section: &prefab_sections::PrefabSection) {
         // Build the map
         let prev_builder = self.previous_builder.as_mut().unwrap();
@@ -238,6 +264,14 @@ impl PrefabBuilder {
             VerticalPlacement::Center => (self.map.height / 2) - (section.height as i32 / 2),
             VerticalPlacement::Bottom => (self.map.height - 1) - section.height as i32,
         };
+
+        // Build the map
+        self.apply_previous_iteration(|x, y, _e| {
+            x < chunk_x
+                || x > (chunk_x + section.width as i32)
+                || y < chunk_y
+                || y > (chunk_y + section.height as i32)
+        });
 
         let mut i = 0;
         for ty in 0..section.height {
