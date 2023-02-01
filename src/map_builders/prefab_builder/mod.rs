@@ -76,7 +76,6 @@ impl PrefabBuilder {
     }
 
     fn char_to_map(&mut self, ch: char, idx: usize) {
-        // TODO(DP): refactor
         match ch {
             ' ' => self.map.tiles[idx] = TileType::Floor,
             '#' => self.map.tiles[idx] = TileType::Wall,
@@ -84,10 +83,7 @@ impl PrefabBuilder {
                 let x = idx as i32 % self.map.width;
                 let y = idx as i32 / self.map.width;
                 self.map.tiles[idx] = TileType::Floor;
-                self.starting_position = Position {
-                    x: x as i32,
-                    y: y as i32,
-                };
+                self.starting_position = Position { x, y };
             }
             '>' => self.map.tiles[idx] = TileType::DownStairs,
             'g' => {
