@@ -91,7 +91,7 @@ Open http://0.0.0.0:8000/
   - [📝 4.9. Add symmetry and brushes to the library](https://bfnightly.bracketproductions.com/rustbook/chapter_31.html)
   - [📝 4.10. Voronoi Hive Maps](https://bfnightly.bracketproductions.com/rustbook/chapter_32.html)
   - [📝 4.11. Wave Function Collapse](https://bfnightly.bracketproductions.com/rustbook/chapter_33.html)
-  - 🚧 4.12. Prefabs & Sectionals
+  - [📝 4.12. Prefabs & Sectionals](https://bfnightly.bracketproductions.com/rustbook/chapter_34.html)
   - 🚧 4.13. Room Vaults
   - 🚧 4.14. Layering/Builder Chaining
   - 🚧 4.15. Fun With Layers
