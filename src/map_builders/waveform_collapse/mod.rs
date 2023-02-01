@@ -1,6 +1,7 @@
 mod common;
 mod constraints;
-mod prefab_builder;
+// TODO(DP): remove 'pub' after moving file
+pub mod prefab_builder;
 mod solver;
 
 use rltk::RandomNumberGenerator;
