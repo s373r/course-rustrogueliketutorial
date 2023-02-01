@@ -36,7 +36,10 @@ pub trait MapBuilder {
 }
 
 pub fn random_builder(new_depth: i32) -> Box<dyn MapBuilder> {
-    Box::new(PrefabBuilder::new(new_depth))
+    Box::new(PrefabBuilder::new(
+        new_depth,
+        Some(Box::new(CellularAutomataBuilder::new(new_depth))),
+    ))
 
     // TODO(DP): return after tests
     // let mut rng = RandomNumberGenerator::new();
