@@ -10,8 +10,6 @@ use crate::map_builders::common::{
 use crate::map_builders::MapBuilder;
 use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
 
-const MIN_ROOM_SIZE: i32 = 8;
-
 pub struct CellularAutomataBuilder {
     map: Map,
     starting_position: Position,
@@ -67,7 +65,6 @@ impl CellularAutomataBuilder {
         }
     }
 
-    #[allow(clippy::map_entry)]
     fn build(&mut self) {
         let mut rng = RandomNumberGenerator::new();
 

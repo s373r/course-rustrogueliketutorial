@@ -8,6 +8,7 @@ use crate::rect::Rect;
 pub enum Symmetry {
     None,
     Horizontal,
+    #[allow(dead_code)]
     Vertical,
     Both,
 }

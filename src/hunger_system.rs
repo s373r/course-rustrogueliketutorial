@@ -7,7 +7,6 @@ use crate::RunState;
 pub struct HungerSystem {}
 
 impl<'a> System<'a> for HungerSystem {
-    #[allow(clippy::type_complexity)]
     type SystemData = (
         Entities<'a>,
         WriteStorage<'a, HungerClock>,

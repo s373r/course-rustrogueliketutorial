@@ -10,7 +10,6 @@ pub struct RexAssets {
 }
 
 impl RexAssets {
-    #[allow(clippy::new_without_default)]
     pub fn new() -> RexAssets {
         rltk::link_resource!(SMALL_DUNGEON, "../resources/SmallDungeon_80x50.xp");
         rltk::link_resource!(WFC_DEMO_IMAGE1, "../resources/wfc-demo1.xp");
