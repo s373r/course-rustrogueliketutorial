@@ -130,7 +130,7 @@ impl PrefabBuilder {
 
     fn build(&mut self) {
         match self.mode {
-            PrefabMode::RexLevel { template } => self.load_rex_map(&template),
+            PrefabMode::RexLevel { template } => self.load_rex_map(template),
         }
 
         // Find a starting point; start at the middle and walk left until we find an open tile
