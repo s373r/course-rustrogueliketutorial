@@ -1,4 +1,5 @@
 mod prefab_levels;
+mod prefab_rooms;
 mod prefab_sections;
 
 use rltk::console;
