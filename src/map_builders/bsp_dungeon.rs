@@ -1,41 +1,35 @@
 use rltk::RandomNumberGenerator;
 
-use crate::components::Position;
 use crate::map::{Map, TileType};
-use crate::map_builders::common::{apply_room, SpawnEntity};
-use crate::map_builders::MapBuilder;
+use crate::map_builders::common::{apply_room, draw_corridor};
+use crate::map_builders::{BuilderMap, InitialMapBuilder};
 use crate::rect::Rect;
-use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
 
 pub struct BspDungeonBuilder {
-    map: Map,
-    starting_position: Position,
-    depth: i32,
-    rooms: Vec<Rect>,
-    history: Vec<Map>,
     rects: Vec<Rect>,
-    spawn_list: Vec<SpawnEntity>,
+}
+
+impl InitialMapBuilder for BspDungeonBuilder {
+    #[allow(dead_code)]
+    fn build_map(&mut self, rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap) {
+        self.build(rng, build_data);
+    }
 }
 
 impl BspDungeonBuilder {
-    pub fn new(new_depth: i32) -> BspDungeonBuilder {
-        BspDungeonBuilder {
-            map: Map::new(new_depth),
-            starting_position: Position { x: 0, y: 0 },
-            depth: new_depth,
-            rooms: Vec::new(),
-            history: Vec::new(),
-            rects: Vec::new(),
-            spawn_list: Vec::new(),
-        }
+    #[allow(dead_code)]
+    pub fn new() -> Box<BspDungeonBuilder> {
+        Box::new(BspDungeonBuilder { rects: Vec::new() })
     }
 
-    fn build(&mut self) {
-        let mut rng = RandomNumberGenerator::new();
-
+    fn build(&mut self, rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap) {
         self.rects.clear();
-        self.rects
-            .push(Rect::new(2, 2, self.map.width - 5, self.map.height - 5)); // Start with a single map-sized rectangle
+        self.rects.push(Rect::new(
+            2,
+            2,
+            build_data.map.width - 5,
+            build_data.map.height - 5,
+        )); // Start with a single map-sized rectangle
 
         let first_room = self.rects[0];
 
@@ -43,60 +37,42 @@ impl BspDungeonBuilder {
 
         // Up to 240 times, we get a random rectangle and divide it. If its possible to squeeze a
         // room in there, we place it and add it to the rooms list.
+        let mut rooms: Vec<Rect> = Vec::new();
         let mut n_rooms = 0;
-
         while n_rooms < 240 {
-            let rect = self.get_random_rect(&mut rng);
-            let candidate = self.get_random_sub_rect(rect, &mut rng);
+            let rect = self.get_random_rect(rng);
+            let candidate = self.get_random_sub_rect(rect, rng);
 
-            if self.is_possible(candidate) {
-                apply_room(&mut self.map, &candidate);
+            if self.is_possible(candidate, &build_data.map) {
+                apply_room(&mut build_data.map, &candidate);
 
-                self.rooms.push(candidate);
+                rooms.push(candidate);
 
                 self.add_subrects(rect);
-                self.take_snapshot();
+                build_data.take_snapshot();
             }
 
             n_rooms += 1;
         }
 
         // Now we sort the rooms
-        self.rooms.sort_by(|a, b| a.x1.cmp(&b.x1));
+        rooms.sort_by(|a, b| a.x1.cmp(&b.x1));
 
         // Now we want corridors
-        for i in 0..self.rooms.len() - 1 {
-            let room = self.rooms[i];
-            let next_room = self.rooms[i + 1];
+        for i in 0..rooms.len() - 1 {
+            let room = rooms[i];
+            let next_room = rooms[i + 1];
 
             let start_x = room.x1 + (rng.roll_dice(1, room.weight()) - 1);
             let start_y = room.y1 + (rng.roll_dice(1, room.height()) - 1);
             let end_x = next_room.x1 + (rng.roll_dice(1, next_room.weight()) - 1);
             let end_y = next_room.y1 + (rng.roll_dice(1, next_room.height()) - 1);
 
-            self.draw_corridor(start_x, start_y, end_x, end_y);
-            self.take_snapshot();
+            draw_corridor(&mut build_data.map, start_x, start_y, end_x, end_y);
+            build_data.take_snapshot();
         }
-        // Don't forget the stairs
-        let stairs = self.rooms[self.rooms.len() - 1].center();
-        let stairs_idx = self.map.xy_idx(stairs.0, stairs.1);
 
-        self.map.tiles[stairs_idx] = TileType::DownStairs;
-
-        self.take_snapshot();
-
-        // Set player start
-        let start = self.rooms[0].center();
-
-        self.starting_position = Position {
-            x: start.0,
-            y: start.1,
-        };
-
-        // Spawn some entities
-        for room in self.rooms.iter().skip(1) {
-            spawner::spawn_room(&self.map, &mut rng, room, self.depth, &mut self.spawn_list);
-        }
+        build_data.rooms = Some(rooms);
     }
 
     fn add_subrects(&mut self, rect: Rect) {
@@ -153,7 +129,7 @@ impl BspDungeonBuilder {
         result
     }
 
-    fn is_possible(&self, rect: Rect) -> bool {
+    fn is_possible(&self, rect: Rect, map: &Map) -> bool {
         let mut expanded = rect;
 
         expanded.x1 -= 2;
@@ -163,10 +139,10 @@ impl BspDungeonBuilder {
 
         for y in expanded.y1..=expanded.y2 {
             for x in expanded.x1..=expanded.x2 {
-                if x > self.map.width - 2 {
+                if x > map.width - 2 {
                     return false;
                 }
-                if y > self.map.height - 2 {
+                if y > map.height - 2 {
                     return false;
                 }
                 if x < 1 {
@@ -176,69 +152,14 @@ impl BspDungeonBuilder {
                     return false;
                 }
 
-                let idx = self.map.xy_idx(x, y);
+                let idx = map.xy_idx(x, y);
 
-                if self.map.tiles[idx] != TileType::Wall {
+                if map.tiles[idx] != TileType::Wall {
                     return false;
                 }
             }
         }
 
         true
-    }
-
-    fn draw_corridor(&mut self, x1: i32, y1: i32, x2: i32, y2: i32) {
-        let mut x = x1;
-        let mut y = y1;
-
-        while x != x2 || y != y2 {
-            if x < x2 {
-                x += 1;
-            } else if x > x2 {
-                x -= 1;
-            } else if y < y2 {
-                y += 1;
-            } else if y > y2 {
-                y -= 1;
-            }
-
-            let idx = self.map.xy_idx(x, y);
-
-            self.map.tiles[idx] = TileType::Floor;
-        }
-    }
-}
-
-impl MapBuilder for BspDungeonBuilder {
-    fn build_map(&mut self) {
-        self.build()
-    }
-
-    fn get_map(&self) -> Map {
-        self.map.clone()
-    }
-
-    fn get_starting_position(&self) -> Position {
-        self.starting_position.clone()
-    }
-
-    fn get_snapshot_history(&self) -> Vec<Map> {
-        self.history.clone()
-    }
-
-    fn take_snapshot(&mut self) {
-        if !SHOW_MAPGEN_VISUALIZER {
-            return;
-        }
-
-        let mut snapshot = self.map.clone();
-
-        snapshot.revealed_tiles.fill(true);
-
-        self.history.push(snapshot);
-    }
-
-    fn get_spawn_list(&self) -> &Vec<SpawnEntity> {
-        &self.spawn_list
     }
 }
