@@ -216,12 +216,17 @@ impl State {
     fn generate_world_map(&mut self, new_depth: i32) {
         self.mapgen_index = 0;
         self.mapgen_timer = 0.0;
-        // NOTE(DP): we do not need clear() since reassignment later
+        // NOTE(DP): we do not need clear() since there is reassignment later
         // self.mapgen_history.clear();
 
-        let mut builder = map_builders::random_builder(new_depth);
+        let mut builder = {
+            let mut rng = self.ecs.write_resource::<RandomNumberGenerator>();
+            let mut builder = map_builders::random_builder(new_depth, &mut rng)
 
-        builder.build_map();
+            builder.build_map(&mut rng);
+
+            builder
+        };
 
         self.mapgen_history = builder.get_snapshot_history();
 
