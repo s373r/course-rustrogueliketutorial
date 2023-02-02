@@ -1,6 +1,7 @@
 pub mod prefab_levels;
 pub mod prefab_rooms;
 pub mod prefab_sections;
+mod room_based_spawner;
 
 use rltk::{console, RandomNumberGenerator};
 use specs::prelude::*;
