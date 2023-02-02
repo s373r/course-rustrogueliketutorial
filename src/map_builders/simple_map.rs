@@ -1,9 +1,8 @@
 use rltk::RandomNumberGenerator;
-use specs::World;
 
 use crate::components::Position;
 use crate::map::{Map, TileType};
-use crate::map_builders::common::{apply_horizontal_tunnel, apply_room, apply_vertical_tunnel};
+use crate::map_builders::common::*;
 use crate::map_builders::MapBuilder;
 use crate::rect::Rect;
 use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
@@ -14,6 +13,7 @@ pub struct SimpleMapBuilder {
     depth: i32,
     rooms: Vec<Rect>,
     history: Vec<Map>,
+    spawn_list: Vec<SpawnEntity>,
 }
 
 impl SimpleMapBuilder {
@@ -24,6 +24,7 @@ impl SimpleMapBuilder {
             depth: new_depth,
             rooms: Vec::new(),
             history: Vec::new(),
+            spawn_list: Vec::new(),
         }
     }
 
@@ -79,19 +80,18 @@ impl SimpleMapBuilder {
         // Start position
         let (x, y) = self.rooms.first().unwrap().center();
 
-        self.starting_position = Position { x, y }
+        self.starting_position = Position { x, y };
+
+        // Spawn some entities
+        for room in self.rooms.iter().skip(1) {
+            spawner::spawn_room(&self.map, &mut rng, room, self.depth, &mut self.spawn_list);
+        }
     }
 }
 
 impl MapBuilder for SimpleMapBuilder {
     fn build_map(&mut self) {
         self.rooms_and_corridors();
-    }
-
-    fn spawn_entities(&self, ecs: &mut World) {
-        for room in self.rooms.iter().skip(1) {
-            spawner::spawn_room(ecs, room, self.depth);
-        }
     }
 
     fn get_map(&self) -> Map {
@@ -116,5 +116,9 @@ impl MapBuilder for SimpleMapBuilder {
         snapshot.revealed_tiles.fill(true);
 
         self.history.push(snapshot);
+    }
+
+    fn get_spawn_list(&self) -> &Vec<SpawnEntity> {
+        &self.spawn_list
     }
 }

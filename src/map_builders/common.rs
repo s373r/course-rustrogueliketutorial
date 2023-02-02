@@ -4,6 +4,8 @@ use std::collections::HashMap;
 use crate::map::{Map, TileType};
 use crate::rect::Rect;
 
+pub type SpawnEntity = (/* map_idx */ usize, /* entity_name */ String);
+
 #[derive(PartialEq, Copy, Clone)]
 pub enum Symmetry {
     None,

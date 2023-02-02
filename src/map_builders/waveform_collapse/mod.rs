@@ -3,7 +3,6 @@ mod constraints;
 mod solver;
 
 use rltk::RandomNumberGenerator;
-use specs::prelude::*;
 use std::collections::HashMap;
 
 use crate::components::Position;
@@ -22,17 +21,12 @@ pub struct WaveformCollapseBuilder {
     history: Vec<Map>,
     noise_areas: HashMap<i32, Vec<usize>>,
     derive_from: Option<Box<dyn MapBuilder>>,
+    spawn_list: Vec<SpawnEntity>,
 }
 
 impl MapBuilder for WaveformCollapseBuilder {
     fn build_map(&mut self) {
         self.build();
-    }
-
-    fn spawn_entities(&self, ecs: &mut World) {
-        for area in self.noise_areas.iter() {
-            spawner::spawn_region(ecs, area.1, self.depth);
-        }
     }
 
     fn get_map(&self) -> Map {
@@ -58,6 +52,10 @@ impl MapBuilder for WaveformCollapseBuilder {
 
         self.history.push(snapshot);
     }
+
+    fn get_spawn_list(&self) -> &Vec<SpawnEntity> {
+        &self.spawn_list
+    }
 }
 
 impl WaveformCollapseBuilder {
@@ -69,6 +67,7 @@ impl WaveformCollapseBuilder {
             history: Vec::new(),
             noise_areas: HashMap::new(),
             derive_from,
+            spawn_list: Vec::new(),
         }
     }
 
@@ -150,6 +149,17 @@ impl WaveformCollapseBuilder {
 
         // Now we build a noise map for use in spawning entities later
         self.noise_areas = generate_voronoi_spawn_regions(&self.map, &mut rng);
+
+        // Spawn the entities
+        for area in self.noise_areas.iter() {
+            spawner::spawn_region(
+                &self.map,
+                &mut rng,
+                area.1,
+                self.depth,
+                &mut self.spawn_list,
+            );
+        }
     }
 
     fn render_tile_gallery(&mut self, patterns: &Vec<MapChunk>, chunk_size: i32) {

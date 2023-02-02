@@ -1,9 +1,8 @@
 use rltk::RandomNumberGenerator;
-use specs::World;
 
 use crate::components::Position;
 use crate::map::{Map, TileType};
-use crate::map_builders::common::apply_room;
+use crate::map_builders::common::{apply_room, SpawnEntity};
 use crate::map_builders::MapBuilder;
 use crate::rect::Rect;
 use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
@@ -15,6 +14,7 @@ pub struct BspDungeonBuilder {
     rooms: Vec<Rect>,
     history: Vec<Map>,
     rects: Vec<Rect>,
+    spawn_list: Vec<SpawnEntity>,
 }
 
 impl BspDungeonBuilder {
@@ -26,6 +26,7 @@ impl BspDungeonBuilder {
             rooms: Vec::new(),
             history: Vec::new(),
             rects: Vec::new(),
+            spawn_list: Vec::new(),
         }
     }
 
@@ -91,6 +92,11 @@ impl BspDungeonBuilder {
             x: start.0,
             y: start.1,
         };
+
+        // Spawn some entities
+        for room in self.rooms.iter().skip(1) {
+            spawner::spawn_room(&self.map, &mut rng, room, self.depth, &mut self.spawn_list);
+        }
     }
 
     fn add_subrects(&mut self, rect: Rect) {
@@ -208,12 +214,6 @@ impl MapBuilder for BspDungeonBuilder {
         self.build()
     }
 
-    fn spawn_entities(&self, ecs: &mut World) {
-        for room in self.rooms.iter().skip(1) {
-            spawner::spawn_room(ecs, room, self.depth);
-        }
-    }
-
     fn get_map(&self) -> Map {
         self.map.clone()
     }
@@ -236,5 +236,9 @@ impl MapBuilder for BspDungeonBuilder {
         snapshot.revealed_tiles.fill(true);
 
         self.history.push(snapshot);
+    }
+
+    fn get_spawn_list(&self) -> &Vec<SpawnEntity> {
+        &self.spawn_list
     }
 }

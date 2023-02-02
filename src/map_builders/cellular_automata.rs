@@ -1,12 +1,9 @@
 use rltk::RandomNumberGenerator;
-use specs::prelude::*;
 use std::collections::HashMap;
 
 use crate::components::Position;
 use crate::map::{Map, TileType};
-use crate::map_builders::common::{
-    generate_voronoi_spawn_regions, remove_unreachable_areas_returning_most_distant,
-};
+use crate::map_builders::common::*;
 use crate::map_builders::MapBuilder;
 use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
 
@@ -16,17 +13,12 @@ pub struct CellularAutomataBuilder {
     depth: i32,
     history: Vec<Map>,
     noise_areas: HashMap<i32, Vec<usize>>,
+    spawn_list: Vec<SpawnEntity>,
 }
 
 impl MapBuilder for CellularAutomataBuilder {
     fn build_map(&mut self) {
         self.build();
-    }
-
-    fn spawn_entities(&self, ecs: &mut World) {
-        for area in self.noise_areas.iter() {
-            spawner::spawn_region(ecs, area.1, self.depth);
-        }
     }
 
     fn get_map(&self) -> Map {
@@ -52,6 +44,10 @@ impl MapBuilder for CellularAutomataBuilder {
 
         self.history.push(snapshot);
     }
+
+    fn get_spawn_list(&self) -> &Vec<SpawnEntity> {
+        &self.spawn_list
+    }
 }
 
 impl CellularAutomataBuilder {
@@ -62,6 +58,7 @@ impl CellularAutomataBuilder {
             depth: new_depth,
             history: Vec::new(),
             noise_areas: HashMap::new(),
+            spawn_list: Vec::new(),
         }
     }
 
@@ -161,5 +158,16 @@ impl CellularAutomataBuilder {
 
         // Now we build a noise map for use in spawning entities later
         self.noise_areas = generate_voronoi_spawn_regions(&self.map, &mut rng);
+
+        // Spawn the entities
+        for area in self.noise_areas.iter() {
+            spawner::spawn_region(
+                &self.map,
+                &mut rng,
+                area.1,
+                self.depth,
+                &mut self.spawn_list,
+            );
+        }
     }
 }

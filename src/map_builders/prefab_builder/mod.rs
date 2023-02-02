@@ -2,12 +2,12 @@ mod prefab_levels;
 mod prefab_rooms;
 mod prefab_sections;
 
-use rltk::console;
+use rltk::{console, RandomNumberGenerator};
 use specs::prelude::*;
 
 use crate::components::Position;
 use crate::map::{Map, TileType};
-use crate::map_builders::common::remove_unreachable_areas_returning_most_distant;
+use crate::map_builders::common::{remove_unreachable_areas_returning_most_distant, SpawnEntity};
 use crate::map_builders::MapBuilder;
 use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
 
@@ -44,12 +44,6 @@ impl MapBuilder for PrefabBuilder {
         self.build();
     }
 
-    fn spawn_entities(&self, ecs: &mut World) {
-        for (map_idx, entity_name) in self.spawns.iter() {
-            spawner::spawn_entity(ecs, &(map_idx, entity_name));
-        }
-    }
-
     fn get_map(&self) -> Map {
         self.map.clone()
     }
@@ -72,6 +66,16 @@ impl MapBuilder for PrefabBuilder {
         snapshot.revealed_tiles.fill(true);
 
         self.history.push(snapshot);
+    }
+
+    fn get_spawn_list(&self) -> &Vec<SpawnEntity> {
+        &self.spawn_list
+    }
+
+    fn spawn_entities(&self, ecs: &mut World) {
+        for (map_idx, entity_name) in self.spawns.iter() {
+            spawner::spawn_entity(ecs, &(map_idx, entity_name));
+        }
     }
 }
 
@@ -224,30 +228,23 @@ impl PrefabBuilder {
         prev_builder.build_map();
 
         self.starting_position = prev_builder.get_starting_position();
-        self.map = prev_builder.get_map().clone();
+        self.map = prev_builder.get_map();
 
-        for e in prev_builder.get_spawn_list().iter() {
-            let (map_idx, entity_name) = e;
-            let x = map_idx as i32 % self.map.width;
-            let y = map_idx as i32 / self.map.width;
+        for spawn_entity in prev_builder.get_spawn_list().iter() {
+            let (map_idx, entity_name) = spawn_entity;
+            let x = *map_idx as i32 % self.map.width;
+            let y = *map_idx as i32 / self.map.width;
 
-            if filter(x, y, e) {
-                self.spawn_list.push((map_idx, entity_name))
+            if filter(x, y, spawn_entity) {
+                let new_spawn_entity = (*map_idx, entity_name.to_string());
+
+                self.spawn_list.push(new_spawn_entity);
             }
         }
         self.take_snapshot();
     }
 
     fn apply_sectional(&mut self, section: &prefab_sections::PrefabSection) {
-        // Build the map
-        let prev_builder = self.previous_builder.as_mut().unwrap();
-
-        prev_builder.build_map();
-
-        self.starting_position = prev_builder.get_starting_position();
-        self.map = prev_builder.get_map();
-        self.take_snapshot();
-
         use prefab_sections::*;
 
         let string_vec = Self::read_ascii_to_vec(section.template);
@@ -266,12 +263,20 @@ impl PrefabBuilder {
         };
 
         // Build the map
+        let prev_builder = self.previous_builder.as_mut().unwrap();
+
+        prev_builder.build_map();
+
+        self.starting_position = prev_builder.get_starting_position();
+        self.map = prev_builder.get_map();
+
         self.apply_previous_iteration(|x, y, _e| {
             x < chunk_x
                 || x > (chunk_x + section.width as i32)
                 || y < chunk_y
                 || y > (chunk_y + section.height as i32)
         });
+        self.take_snapshot();
 
         let mut i = 0;
         for ty in 0..section.height {

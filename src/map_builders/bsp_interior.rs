@@ -1,8 +1,8 @@
 use rltk::RandomNumberGenerator;
-use specs::prelude::*;
 
 use crate::components::Position;
 use crate::map::{Map, TileType};
+use crate::map_builders::common::SpawnEntity;
 use crate::map_builders::MapBuilder;
 use crate::rect::Rect;
 use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
@@ -16,17 +16,12 @@ pub struct BspInteriorBuilder {
     rooms: Vec<Rect>,
     history: Vec<Map>,
     rects: Vec<Rect>,
+    spawn_list: Vec<SpawnEntity>,
 }
 
 impl MapBuilder for BspInteriorBuilder {
     fn build_map(&mut self) {
         self.build();
-    }
-
-    fn spawn_entities(&self, ecs: &mut World) {
-        for room in self.rooms.iter().skip(1) {
-            spawner::spawn_room(ecs, room, self.depth);
-        }
     }
 
     fn get_map(&self) -> Map {
@@ -52,6 +47,10 @@ impl MapBuilder for BspInteriorBuilder {
 
         self.history.push(snapshot);
     }
+
+    fn get_spawn_list(&self) -> &Vec<SpawnEntity> {
+        &self.spawn_list
+    }
 }
 
 impl BspInteriorBuilder {
@@ -63,6 +62,7 @@ impl BspInteriorBuilder {
             rooms: Vec::new(),
             history: Vec::new(),
             rects: Vec::new(),
+            spawn_list: Vec::new(),
         }
     }
 
@@ -126,6 +126,11 @@ impl BspInteriorBuilder {
             x: start.0,
             y: start.1,
         };
+
+        // Spawn some entities
+        for room in self.rooms.iter().skip(1) {
+            spawner::spawn_room(&self.map, &mut rng, room, self.depth, &mut self.spawn_list);
+        }
     }
 
     fn add_subrects(&mut self, rect: Rect, rng: &mut RandomNumberGenerator) {

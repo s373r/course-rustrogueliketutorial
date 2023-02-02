@@ -1,7 +1,7 @@
 mod bsp_dungeon;
 mod bsp_interior;
 mod cellular_automata;
-mod common;
+pub mod common;
 mod dla;
 mod drunkard;
 mod maze;
@@ -18,6 +18,7 @@ use crate::map::Map;
 use crate::map_builders::bsp_dungeon::BspDungeonBuilder;
 use crate::map_builders::bsp_interior::BspInteriorBuilder;
 use crate::map_builders::cellular_automata::CellularAutomataBuilder;
+use crate::map_builders::common::SpawnEntity;
 use crate::map_builders::dla::DLABuilder;
 use crate::map_builders::drunkard::DrunkardsWalkBuilder;
 use crate::map_builders::maze::MazeBuilder;
@@ -25,14 +26,21 @@ use crate::map_builders::prefab_builder::PrefabBuilder;
 use crate::map_builders::simple_map::SimpleMapBuilder;
 use crate::map_builders::voronoi::VoronoiCellBuilder;
 use crate::map_builders::waveform_collapse::WaveformCollapseBuilder;
+use crate::spawner;
 
 pub trait MapBuilder {
     fn build_map(&mut self);
-    fn spawn_entities(&self, ecs: &mut World);
     fn get_map(&self) -> Map;
     fn get_starting_position(&self) -> Position;
     fn get_snapshot_history(&self) -> Vec<Map>;
     fn take_snapshot(&mut self);
+    fn get_spawn_list(&self) -> &Vec<SpawnEntity>;
+
+    fn spawn_entities(&self, ecs: &mut World) {
+        for (map_idx, entity_name) in self.get_spawn_list().iter() {
+            spawner::spawn_entity(ecs, &(map_idx, entity_name));
+        }
+    }
 }
 
 pub fn random_builder(new_depth: i32) -> Box<dyn MapBuilder> {
