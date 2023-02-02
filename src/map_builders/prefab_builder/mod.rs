@@ -78,16 +78,48 @@ impl MapBuilder for PrefabBuilder {
 }
 
 impl PrefabBuilder {
-    pub fn new(new_depth: i32, previous_builder: Option<Box<dyn MapBuilder>>) -> PrefabBuilder {
+    fn new(
+        new_depth: i32,
+        mode: PrefabMode,
+        previous_builder: Option<Box<dyn MapBuilder>>,
+    ) -> PrefabBuilder {
         PrefabBuilder {
             map: Map::new(new_depth),
             starting_position: Position { x: 0, y: 0 },
             depth: new_depth,
             history: Vec::new(),
-            mode: PrefabMode::RoomVaults,
+            mode,
             previous_builder,
             spawn_list: Vec::new(),
         }
+    }
+
+    #[allow(dead_code)]
+    pub fn rex_level(new_depth: i32, template: &'static str) -> PrefabBuilder {
+        Self::new(new_depth, PrefabMode::RexLevel { template }, None)
+    }
+
+    #[allow(dead_code)]
+    pub fn constant(new_depth: i32, level: prefab_levels::PrefabLevel) -> PrefabBuilder {
+        Self::new(new_depth, PrefabMode::Constant { level }, None)
+    }
+
+    #[allow(dead_code)]
+    pub fn sectional(
+        new_depth: i32,
+        section: prefab_sections::PrefabSection,
+        previous_builder: Box<dyn MapBuilder>,
+    ) -> PrefabBuilder {
+        Self::new(
+            new_depth,
+            PrefabMode::Sectional { section },
+            Some(previous_builder),
+        )
+    }
+
+    #[allow(dead_code)]
+    pub fn vaults(new_depth: i32, previous_builder: Box<dyn MapBuilder>) -> PrefabBuilder {
+        Self::new(new_depth, PrefabMode::RoomVaults, Some(previous_builder))
     }
 
     fn char_to_map(&mut self, ch: char, idx: usize) {
