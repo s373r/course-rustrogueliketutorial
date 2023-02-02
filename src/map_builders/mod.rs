@@ -29,6 +29,14 @@ use crate::map_builders::waveform_collapse::WaveformCollapseBuilder;
 use crate::rect::Rect;
 use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
 
+pub trait InitialMapBuilder {
+    fn build_map(&mut self, rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap);
+}
+
+pub trait MetaMapBuilder {
+    fn build_map(&mut self, rng: &mut RandomNumberGenerator, build_data: &mut BuilderMap);
+}
+
 pub struct BuilderMap {
     pub spawn_list: Vec<(usize, String)>,
     pub map: Map,
@@ -96,6 +104,12 @@ impl BuilderChain {
         // Build additional layers in turn
         for meta_builder in self.builders.iter_mut() {
             meta_builder.build_map(rng, &mut self.build_data);
+        }
+    }
+
+    pub fn spawn_entities(&mut self, ecs: &mut World) {
+        for (map_idx, entity_name) in self.build_data.spawn_list.iter() {
+            spawner::spawn_entity(ecs, &(map_idx, entity_name));
         }
     }
 }
