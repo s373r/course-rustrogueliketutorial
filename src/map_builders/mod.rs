@@ -26,7 +26,30 @@ use crate::map_builders::prefab_builder::PrefabBuilder;
 use crate::map_builders::simple_map::SimpleMapBuilder;
 use crate::map_builders::voronoi::VoronoiCellBuilder;
 use crate::map_builders::waveform_collapse::WaveformCollapseBuilder;
-use crate::spawner;
+use crate::rect::Rect;
+use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
+
+pub struct BuilderMap {
+    pub spawn_list: Vec<(usize, String)>,
+    pub map: Map,
+    pub starting_position: Option<Position>,
+    pub rooms: Option<Vec<Rect>>,
+    pub history: Vec<Map>,
+}
+
+impl BuilderMap {
+    fn take_snapshot(&mut self) {
+        if !SHOW_MAPGEN_VISUALIZER {
+            return;
+        }
+
+        let mut snapshot = self.map.clone();
+
+        snapshot.revealed_tiles.fill(true);
+
+        self.history.push(snapshot);
+    }
+}
 
 pub trait MapBuilder {
     fn build_map(&mut self);
