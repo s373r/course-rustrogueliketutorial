@@ -138,7 +138,7 @@ pub trait MapBuilder {
 
 pub fn random_builder(new_depth: i32, _rng: &mut RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(new_depth);
-    builder.start_with(BspDungeonBuilder::new());
+    builder.start_with(BspInteriorBuilder::new());
     builder.with(RoomBasedSpawner::new());
     builder.with(RoomBasedStartingPosition::new());
     builder.with(RoomBasedStairs::new());
