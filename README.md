@@ -93,7 +93,7 @@ Open http://0.0.0.0:8000/
   - [📝 4.11. Wave Function Collapse](https://bfnightly.bracketproductions.com/rustbook/chapter_33.html)
   - [📝 4.12. Prefabs & Sectionals](https://bfnightly.bracketproductions.com/rustbook/chapter_34.html)
   - [📝 4.13. Room Vaults](https://bfnightly.bracketproductions.com/rustbook/chapter_35.html)
-  - 🚧 4.14. Layering/Builder Chaining
+  - [📝 4.14. Layering/Builder Chaining](https://bfnightly.bracketproductions.com/rustbook/chapter_36.html)
   - 🚧 4.15. Fun With Layers
   - 🚧 4.16. Room Builders
   - 🚧 4.17. Better Corridors
