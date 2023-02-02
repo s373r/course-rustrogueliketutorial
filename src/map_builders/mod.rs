@@ -65,6 +65,7 @@ pub struct BuilderChain {
     pub build_data: BuilderMap,
 }
 
+// TODO(DP): use fluent interface for methods
 impl BuilderChain {
     pub fn new(new_depth: i32) -> BuilderChain {
         BuilderChain {
@@ -129,46 +130,54 @@ pub trait MapBuilder {
     }
 }
 
-pub fn random_builder(new_depth: i32) -> Box<dyn MapBuilder> {
-    let mut rng = RandomNumberGenerator::new();
-    let builder = rng.roll_dice(1, 17);
+pub fn random_builder(new_depth: i32, _rng: &mut RandomNumberGenerator) -> BuilderChain {
+    let mut builder = BuilderChain::new(new_depth);
+    builder.start_with(SimpleMapBuilder::new());
+    builder.with(RoomBasedSpawner::new());
+    builder.with(RoomBasedStartingPosition::new());
+    builder.with(RoomBasedStairs::new());
+    builder
 
-    let mut result: Box<dyn MapBuilder> = match builder {
-        1 => Box::new(BspDungeonBuilder::new(new_depth)),
-        2 => Box::new(BspInteriorBuilder::new(new_depth)),
-        3 => Box::new(CellularAutomataBuilder::new(new_depth)),
-        4 => Box::new(DrunkardsWalkBuilder::open_area(new_depth)),
-        5 => Box::new(DrunkardsWalkBuilder::open_halls(new_depth)),
-        6 => Box::new(DrunkardsWalkBuilder::winding_passages(new_depth)),
-        7 => Box::new(DrunkardsWalkBuilder::fat_passages(new_depth)),
-        8 => Box::new(DrunkardsWalkBuilder::fearful_symmetry(new_depth)),
-        9 => Box::new(MazeBuilder::new(new_depth)),
-        10 => Box::new(DLABuilder::walk_inwards(new_depth)),
-        11 => Box::new(DLABuilder::walk_outwards(new_depth)),
-        12 => Box::new(DLABuilder::central_attractor(new_depth)),
-        13 => Box::new(DLABuilder::insectoid(new_depth)),
-        14 => Box::new(VoronoiCellBuilder::pythagoras(new_depth)),
-        15 => Box::new(VoronoiCellBuilder::manhattan(new_depth)),
-        16 => Box::new(PrefabBuilder::constant(
-            new_depth,
-            prefab_builder::prefab_levels::WFC_POPULATED,
-        )),
-        _ => Box::new(SimpleMapBuilder::new(new_depth)),
-    };
-
-    if rng.roll_dice(1, 3) == 1 {
-        result = Box::new(WaveformCollapseBuilder::derived_map(new_depth, result));
-    }
-
-    if rng.roll_dice(1, 20) == 1 {
-        result = Box::new(PrefabBuilder::sectional(
-            new_depth,
-            prefab_builder::prefab_sections::UNDERGROUND_FORT,
-            result,
-        ));
-    }
-
-    result = Box::new(PrefabBuilder::vaults(new_depth, result));
-
-    result
+    // TODO(DP): remove completely after migration
+    // let mut rng = RandomNumberGenerator::new();
+    // let builder = rng.roll_dice(1, 17);
+    //
+    // let mut result: Box<dyn MapBuilder> = match builder {
+    //     1 => Box::new(BspDungeonBuilder::new(new_depth)),
+    //     2 => Box::new(BspInteriorBuilder::new(new_depth)),
+    //     3 => Box::new(CellularAutomataBuilder::new(new_depth)),
+    //     4 => Box::new(DrunkardsWalkBuilder::open_area(new_depth)),
+    //     5 => Box::new(DrunkardsWalkBuilder::open_halls(new_depth)),
+    //     6 => Box::new(DrunkardsWalkBuilder::winding_passages(new_depth)),
+    //     7 => Box::new(DrunkardsWalkBuilder::fat_passages(new_depth)),
+    //     8 => Box::new(DrunkardsWalkBuilder::fearful_symmetry(new_depth)),
+    //     9 => Box::new(MazeBuilder::new(new_depth)),
+    //     10 => Box::new(DLABuilder::walk_inwards(new_depth)),
+    //     11 => Box::new(DLABuilder::walk_outwards(new_depth)),
+    //     12 => Box::new(DLABuilder::central_attractor(new_depth)),
+    //     13 => Box::new(DLABuilder::insectoid(new_depth)),
+    //     14 => Box::new(VoronoiCellBuilder::pythagoras(new_depth)),
+    //     15 => Box::new(VoronoiCellBuilder::manhattan(new_depth)),
+    //     16 => Box::new(PrefabBuilder::constant(
+    //         new_depth,
+    //         prefab_builder::prefab_levels::WFC_POPULATED,
+    //     )),
+    //     _ => Box::new(SimpleMapBuilder::new(new_depth)),
+    // };
+    //
+    // if rng.roll_dice(1, 3) == 1 {
+    //     result = Box::new(WaveformCollapseBuilder::derived_map(new_depth, result));
+    // }
+    //
+    // if rng.roll_dice(1, 20) == 1 {
+    //     result = Box::new(PrefabBuilder::sectional(
+    //         new_depth,
+    //         prefab_builder::prefab_sections::UNDERGROUND_FORT,
+    //         result,
+    //     ));
+    // }
+    //
+    // result = Box::new(PrefabBuilder::vaults(new_depth, result));
+    //
+    // result
 }
