@@ -51,6 +51,55 @@ impl BuilderMap {
     }
 }
 
+pub struct BuilderChain {
+    starter: Option<Box<dyn InitialMapBuilder>>,
+    builders: Vec<Box<dyn MetaMapBuilder>>,
+    pub build_data: BuilderMap,
+}
+
+impl BuilderChain {
+    pub fn new(new_depth: i32) -> BuilderChain {
+        BuilderChain {
+            starter: None,
+            builders: Vec::new(),
+            build_data: BuilderMap {
+                spawn_list: Vec::new(),
+                map: Map::new(new_depth),
+                starting_position: None,
+                rooms: None,
+                history: Vec::new(),
+            },
+        }
+    }
+
+    pub fn start_with(&mut self, starter: Box<dyn InitialMapBuilder>) {
+        if self.starter.is_some() {
+            panic!("You can only have one starting builder.")
+        }
+
+        self.starter = Some(starter);
+    }
+
+    pub fn with(&mut self, meta_builder: Box<dyn MetaMapBuilder>) {
+        self.builders.push(meta_builder);
+    }
+
+    pub fn build_map(&mut self, rng: &mut rltk::RandomNumberGenerator) {
+        match &mut self.starter {
+            None => panic!("Cannot run a map builder chain without a starting build system"),
+            Some(starter) => {
+                // Build the starting map
+                starter.build_map(rng, &mut self.build_data);
+            }
+        }
+
+        // Build additional layers in turn
+        for meta_builder in self.builders.iter_mut() {
+            meta_builder.build_map(rng, &mut self.build_data);
+        }
+    }
+}
+
 pub trait MapBuilder {
     fn build_map(&mut self);
     fn get_map(&self) -> Map;
