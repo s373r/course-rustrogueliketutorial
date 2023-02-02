@@ -219,23 +219,24 @@ impl State {
         // NOTE(DP): we do not need clear() since there is reassignment later
         // self.mapgen_history.clear();
 
-        let mut builder = {
-            let mut rng = self.ecs.write_resource::<RandomNumberGenerator>();
-            let mut builder = map_builders::random_builder(new_depth, &mut rng)
+        let mut rng = self.ecs.write_resource::<RandomNumberGenerator>();
+        let mut builder = map_builders::random_builder(new_depth, &mut rng);
+        builder.build_map(&mut rng);
+        drop(rng);
 
-            builder.build_map(&mut rng);
-
-            builder
-        };
-
-        self.mapgen_history = builder.get_snapshot_history();
+        self.mapgen_history = builder.build_data.history.clone();
 
         let player_start = {
             let mut map_resource = self.ecs.write_resource::<Map>();
 
-            *map_resource = builder.get_map();
+            *map_resource = builder.build_data.map.clone();
 
-            builder.get_starting_position()
+            builder
+                .build_data
+                .starting_position
+                .as_mut()
+                .unwrap()
+                .clone()
         };
 
         // Spawn bad guys

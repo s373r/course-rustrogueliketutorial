@@ -1,11 +1,8 @@
 use rltk::RandomNumberGenerator;
 
-use crate::components::Position;
-use crate::map::{Map, TileType};
 use crate::map_builders::common::*;
-use crate::map_builders::{BuilderMap, InitialMapBuilder, MapBuilder};
+use crate::map_builders::{BuilderMap, InitialMapBuilder};
 use crate::rect::Rect;
-use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
 
 pub struct SimpleMapBuilder {}
 
@@ -49,7 +46,7 @@ impl SimpleMapBuilder {
 
             apply_room(&mut build_data.map, &new_room);
 
-            self.take_snapshot();
+            build_data.take_snapshot();
 
             if !rooms.is_empty() {
                 let (new_x, new_y) = new_room.center();
@@ -66,43 +63,9 @@ impl SimpleMapBuilder {
 
             rooms.push(new_room);
 
-            self.take_snapshot();
+            build_data.take_snapshot();
         }
 
         build_data.rooms = Some(rooms);
-    }
-}
-
-impl MapBuilder for SimpleMapBuilder {
-    fn build_map(&mut self) {
-        self.rooms_and_corridors();
-    }
-
-    fn get_map(&self) -> Map {
-        self.map.clone()
-    }
-
-    fn get_starting_position(&self) -> Position {
-        self.starting_position.clone()
-    }
-
-    fn get_snapshot_history(&self) -> Vec<Map> {
-        self.history.clone()
-    }
-
-    fn take_snapshot(&mut self) {
-        if !SHOW_MAPGEN_VISUALIZER {
-            return;
-        }
-
-        let mut snapshot = self.map.clone();
-
-        snapshot.revealed_tiles.fill(true);
-
-        self.history.push(snapshot);
-    }
-
-    fn get_spawn_list(&self) -> &Vec<SpawnEntity> {
-        &self.spawn_list
     }
 }
