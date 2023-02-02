@@ -44,9 +44,16 @@ pub trait MapBuilder {
 }
 
 pub fn random_builder(new_depth: i32) -> Box<dyn MapBuilder> {
-    Box::new(PrefabBuilder::new(
+    Box::new(PrefabBuilder::vaults(
         new_depth,
-        Some(Box::new(SimpleMapBuilder::new(new_depth))),
+        Box::new(PrefabBuilder::sectional(
+            new_depth,
+            prefab_builder::prefab_sections::UNDERGROUND_FORT,
+            Box::new(WaveformCollapseBuilder::derived_map(
+                new_depth,
+                Box::new(CellularAutomataBuilder::new(new_depth)),
+            )),
+        )),
     ))
 
     // TODO(DP): return after tests

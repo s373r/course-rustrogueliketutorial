@@ -1,6 +1,6 @@
-mod prefab_levels;
-mod prefab_rooms;
-mod prefab_sections;
+pub mod prefab_levels;
+pub mod prefab_rooms;
+pub mod prefab_sections;
 
 use rltk::{console, RandomNumberGenerator};
 use specs::prelude::*;
