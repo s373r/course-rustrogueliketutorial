@@ -2,6 +2,7 @@ pub mod prefab_levels;
 pub mod prefab_rooms;
 pub mod prefab_sections;
 mod room_based_spawner;
+mod room_based_stairs;
 mod room_based_starting_position;
 
 use rltk::{console, RandomNumberGenerator};
