@@ -29,14 +29,11 @@ pub enum PrefabMode {
 pub struct PrefabBuilder {
     map: Map,
     starting_position: Position,
-    // TODO(DP): do we really need this field?
     depth: i32,
     history: Vec<Map>,
     mode: PrefabMode,
-    // TODO(DP): extract into own type alias
-    spawns: Vec<(usize, String)>,
     previous_builder: Option<Box<dyn MapBuilder>>,
-    spawn_list: Vec<(usize, String)>,
+    spawn_list: Vec<SpawnEntity>,
 }
 
 impl MapBuilder for PrefabBuilder {
@@ -73,7 +70,7 @@ impl MapBuilder for PrefabBuilder {
     }
 
     fn spawn_entities(&self, ecs: &mut World) {
-        for (map_idx, entity_name) in self.spawns.iter() {
+        for (map_idx, entity_name) in self.spawn_list.iter() {
             spawner::spawn_entity(ecs, &(map_idx, entity_name));
         }
     }
@@ -87,7 +84,6 @@ impl PrefabBuilder {
             depth: new_depth,
             history: Vec::new(),
             mode: PrefabMode::RoomVaults,
-            spawns: Vec::new(),
             previous_builder,
             spawn_list: Vec::new(),
         }
@@ -106,23 +102,23 @@ impl PrefabBuilder {
             '>' => self.map.tiles[idx] = TileType::DownStairs,
             'g' => {
                 self.map.tiles[idx] = TileType::Floor;
-                self.spawns.push((idx, "Goblin".to_string()));
+                self.spawn_list.push((idx, "Goblin".to_string()));
             }
             'o' => {
                 self.map.tiles[idx] = TileType::Floor;
-                self.spawns.push((idx, "Orc".to_string()));
+                self.spawn_list.push((idx, "Orc".to_string()));
             }
             '^' => {
                 self.map.tiles[idx] = TileType::Floor;
-                self.spawns.push((idx, "Bear Trap".to_string()));
+                self.spawn_list.push((idx, "Bear Trap".to_string()));
             }
             '%' => {
                 self.map.tiles[idx] = TileType::Floor;
-                self.spawns.push((idx, "Rations".to_string()));
+                self.spawn_list.push((idx, "Rations".to_string()));
             }
             '!' => {
                 self.map.tiles[idx] = TileType::Floor;
-                self.spawns.push((idx, "Health Potion".to_string()));
+                self.spawn_list.push((idx, "Health Potion".to_string()));
             }
             _ => {
                 console::log(format!("Unknown glyph loading map: {}", (ch as u8) as char));
@@ -221,7 +217,7 @@ impl PrefabBuilder {
 
     fn apply_previous_iteration<F>(&mut self, mut filter: F)
     where
-        F: FnMut(i32, i32, &(usize, String)) -> bool,
+        F: FnMut(i32, i32, &SpawnEntity) -> bool,
     {
         // Build the map
         let prev_builder = self.previous_builder.as_mut().unwrap();
