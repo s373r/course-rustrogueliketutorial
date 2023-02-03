@@ -159,12 +159,13 @@ fn random_initial_builder(
 pub fn random_builder(new_depth: i32, _rng: &mut rltk::RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(new_depth);
 
-    builder.start_with(VoronoiCellBuilder::pythagoras());
-    builder.with(CellularAutomataBuilder::new());
+    builder.start_with(SimpleMapBuilder::new());
+    builder.with(DrunkardsWalkBuilder::winding_passages());
     builder.with(AreaStartingPosition::new(XStart::Center, YStart::Center));
     builder.with(CullUnreachable::new());
     builder.with(VoronoiSpawning::new());
     builder.with(DistantExit::new());
+
     builder
 
     // TODO(DP): return after tests

@@ -1,7 +1,7 @@
 use crate::components::Position;
 use crate::map::TileType;
 use crate::map_builders::common::*;
-use crate::map_builders::{BuilderMap, InitialMapBuilder};
+use crate::map_builders::{BuilderMap, InitialMapBuilder, MetaMapBuilder};
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum DrunkSpawnMode {
@@ -22,6 +22,13 @@ pub struct DrunkardsWalkBuilder {
 }
 
 impl InitialMapBuilder for DrunkardsWalkBuilder {
+    #[allow(dead_code)]
+    fn build_map(&mut self, rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
+        self.build(rng, build_data);
+    }
+}
+
+impl MetaMapBuilder for DrunkardsWalkBuilder {
     #[allow(dead_code)]
     fn build_map(&mut self, rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
         self.build(rng, build_data);
