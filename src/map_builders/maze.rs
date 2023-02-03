@@ -1,111 +1,32 @@
-use crate::components::Position;
-use rltk::RandomNumberGenerator;
-use std::collections::HashMap;
-
 use crate::map::{Map, TileType};
-use crate::map_builders::common::*;
-use crate::map_builders::MapBuilder;
-use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
+use crate::map_builders::BuilderMap;
+use crate::map_builders::InitialMapBuilder;
 
-pub struct MazeBuilder {
-    map: Map,
-    starting_position: Position,
-    depth: i32,
-    history: Vec<Map>,
-    noise_areas: HashMap<i32, Vec<usize>>,
-    spawn_list: Vec<SpawnEntity>,
-}
+pub struct MazeBuilder {}
 
-impl MapBuilder for MazeBuilder {
-    fn build_map(&mut self) {
-        self.build();
-    }
-
-    fn get_map(&self) -> Map {
-        self.map.clone()
-    }
-
-    fn get_starting_position(&self) -> Position {
-        self.starting_position.clone()
-    }
-
-    fn get_snapshot_history(&self) -> Vec<Map> {
-        self.history.clone()
-    }
-
-    fn take_snapshot(&mut self) {
-        if !SHOW_MAPGEN_VISUALIZER {
-            return;
-        }
-
-        let mut snapshot = self.map.clone();
-
-        snapshot.revealed_tiles.fill(true);
-
-        self.history.push(snapshot);
-    }
-
-    fn get_spawn_list(&self) -> &Vec<SpawnEntity> {
-        &self.spawn_list
+impl InitialMapBuilder for MazeBuilder {
+    #[allow(dead_code)]
+    fn build_map(&mut self, rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
+        self.build(rng, build_data);
     }
 }
 
 impl MazeBuilder {
-    pub fn new(new_depth: i32) -> MazeBuilder {
-        MazeBuilder {
-            map: Map::new(new_depth),
-            starting_position: Position { x: 0, y: 0 },
-            depth: new_depth,
-            history: Vec::new(),
-            noise_areas: HashMap::new(),
-            spawn_list: Vec::new(),
-        }
+    #[allow(dead_code)]
+    pub fn new() -> Box<MazeBuilder> {
+        Box::new(MazeBuilder {})
     }
 
     #[allow(clippy::map_entry)]
-    fn build(&mut self) {
-        let mut rng = RandomNumberGenerator::new();
-
+    fn build(&mut self, rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
         // Maze gen
         let mut maze = Grid::new(
-            (self.map.width / 2) - 2,
-            (self.map.height / 2) - 2,
-            &mut rng,
+            (build_data.map.width / 2) - 2,
+            (build_data.map.height / 2) - 2,
+            rng,
         );
-        maze.generate_maze(self);
 
-        // Find a starting point; start at the middle and walk left until we find an open tile
-        self.starting_position = Position { x: 2, y: 2 };
-
-        let start_idx = self
-            .map
-            .xy_idx(self.starting_position.x, self.starting_position.y);
-
-        self.take_snapshot();
-
-        // Find all tiles we can reach from the starting point
-        let exit_tile = remove_unreachable_areas_returning_most_distant(&mut self.map, start_idx);
-
-        self.take_snapshot();
-
-        // Place the stairs
-        self.map.tiles[exit_tile] = TileType::DownStairs;
-
-        self.take_snapshot();
-
-        // Now we build a noise map for use in spawning entities later
-        self.noise_areas = generate_voronoi_spawn_regions(&self.map, &mut rng);
-
-        // Spawn the entities
-        for area in self.noise_areas.iter() {
-            spawner::spawn_region(
-                &self.map,
-                &mut rng,
-                area.1,
-                self.depth,
-                &mut self.spawn_list,
-            );
-        }
+        maze.generate_maze(build_data);
     }
 }
 
@@ -160,11 +81,11 @@ struct Grid<'a> {
     cells: Vec<Cell>,
     backtrace: Vec<usize>,
     current: usize,
-    rng: &'a mut RandomNumberGenerator,
+    rng: &'a mut rltk::RandomNumberGenerator,
 }
 
 impl<'a> Grid<'a> {
-    fn new(width: i32, height: i32, rng: &mut RandomNumberGenerator) -> Grid {
+    fn new(width: i32, height: i32, rng: &mut rltk::RandomNumberGenerator) -> Grid {
         let mut grid = Grid {
             width,
             height,
@@ -230,7 +151,7 @@ impl<'a> Grid<'a> {
         }
     }
 
-    fn generate_maze(&mut self, generator: &mut MazeBuilder) {
+    fn generate_maze(&mut self, build_data: &mut BuilderMap) {
         // NOTE(DP): for generation speed-up
         let mut i = 0;
 
@@ -259,8 +180,8 @@ impl<'a> Grid<'a> {
                 None => {
                     if self.backtrace.is_empty() {
                         // NOTE(DP): to save the latest state
-                        self.copy_to_map(&mut generator.map);
-                        generator.take_snapshot();
+                        self.copy_to_map(&mut build_data.map);
+                        build_data.take_snapshot();
 
                         break;
                     }
@@ -271,8 +192,8 @@ impl<'a> Grid<'a> {
             }
 
             if i % 50 == 0 {
-                self.copy_to_map(&mut generator.map);
-                generator.take_snapshot();
+                self.copy_to_map(&mut build_data.map);
+                build_data.take_snapshot();
             }
 
             i += 1;
