@@ -1,7 +1,7 @@
 use crate::components::Position;
 use crate::map::TileType;
 use crate::map_builders::common::*;
-use crate::map_builders::{BuilderMap, InitialMapBuilder};
+use crate::map_builders::{BuilderMap, InitialMapBuilder, MetaMapBuilder};
 
 const MAP_GENERATION_SAVE_AFTER_SNAPSHOTS_COUNT: i32 = 25;
 
@@ -20,6 +20,13 @@ pub struct DLABuilder {
 }
 
 impl InitialMapBuilder for DLABuilder {
+    #[allow(dead_code)]
+    fn build_map(&mut self, rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
+        self.build(rng, build_data);
+    }
+}
+
+impl MetaMapBuilder for DLABuilder {
     #[allow(dead_code)]
     fn build_map(&mut self, rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
         self.build(rng, build_data);
@@ -50,6 +57,16 @@ impl DLABuilder {
 
     pub fn insectoid() -> Box<DLABuilder> {
         Self::new(DLAAlgorithm::CentralAttractor, 2, Symmetry::Horizontal)
+    }
+
+    #[allow(dead_code)]
+    pub fn heavy_erosion() -> Box<DLABuilder> {
+        Box::new(DLABuilder {
+            algorithm: DLAAlgorithm::WalkInwards,
+            brush_size: 2,
+            symmetry: Symmetry::None,
+            floor_percent: 0.35,
+        })
     }
 
     fn build(&mut self, rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
