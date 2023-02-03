@@ -12,6 +12,7 @@ mod prefab_builder;
 mod room_based_spawner;
 mod room_based_stairs;
 mod room_based_starting_position;
+mod room_exploder;
 mod simple_map;
 mod voronoi;
 mod voronoi_spawning;
@@ -34,6 +35,7 @@ use crate::map_builders::prefab_builder::PrefabBuilder;
 use crate::map_builders::room_based_spawner::RoomBasedSpawner;
 use crate::map_builders::room_based_stairs::RoomBasedStairs;
 use crate::map_builders::room_based_starting_position::RoomBasedStartingPosition;
+use crate::map_builders::room_exploder::RoomExploder;
 use crate::map_builders::simple_map::SimpleMapBuilder;
 use crate::map_builders::voronoi::VoronoiCellBuilder;
 use crate::map_builders::voronoi_spawning::VoronoiSpawning;
@@ -159,8 +161,8 @@ fn random_initial_builder(
 pub fn random_builder(new_depth: i32, _rng: &mut rltk::RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(new_depth);
 
-    builder.start_with(SimpleMapBuilder::new());
-    builder.with(DLABuilder::heavy_erosion());
+    builder.start_with(BspDungeonBuilder::new());
+    builder.with(RoomExploder::new());
     builder.with(AreaStartingPosition::new(XStart::Center, YStart::Center));
     builder.with(CullUnreachable::new());
     builder.with(VoronoiSpawning::new());
