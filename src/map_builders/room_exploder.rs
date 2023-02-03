@@ -20,7 +20,6 @@ impl RoomExploder {
         let Some(rooms_builder) = &build_data.rooms else {
             panic!("Room Explosions require a builder with room structures");
         };
-
         let rooms = rooms_builder.clone();
 
         for room in rooms.iter() {
