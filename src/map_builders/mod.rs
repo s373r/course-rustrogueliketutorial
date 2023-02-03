@@ -14,6 +14,7 @@ mod room_based_stairs;
 mod room_based_starting_position;
 mod room_corner_rounding;
 mod room_exploder;
+mod rooms_corridors_dogleg;
 mod simple_map;
 mod voronoi;
 mod voronoi_spawning;
@@ -38,6 +39,7 @@ use crate::map_builders::room_based_stairs::RoomBasedStairs;
 use crate::map_builders::room_based_starting_position::RoomBasedStartingPosition;
 use crate::map_builders::room_corner_rounding::RoomCornerRounder;
 use crate::map_builders::room_exploder::RoomExploder;
+use crate::map_builders::rooms_corridors_dogleg::DoglegCorridors;
 use crate::map_builders::simple_map::SimpleMapBuilder;
 use crate::map_builders::voronoi::VoronoiCellBuilder;
 use crate::map_builders::voronoi_spawning::VoronoiSpawning;
@@ -163,12 +165,11 @@ fn random_initial_builder(
 pub fn random_builder(new_depth: i32, _rng: &mut rltk::RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(new_depth);
 
-    builder.start_with(BspDungeonBuilder::new());
-    builder.with(RoomCornerRounder::new());
-    builder.with(AreaStartingPosition::new(XStart::Center, YStart::Center));
-    builder.with(CullUnreachable::new());
-    builder.with(VoronoiSpawning::new());
-    builder.with(DistantExit::new());
+    builder.start_with(SimpleMapBuilder::new());
+    builder.with(DoglegCorridors::new());
+    builder.with(RoomBasedSpawner::new());
+    builder.with(RoomBasedStairs::new());
+    builder.with(RoomBasedStartingPosition::new());
 
     builder
 
