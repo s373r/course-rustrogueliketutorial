@@ -129,21 +129,6 @@ impl BuilderChain {
     }
 }
 
-pub trait MapBuilder {
-    fn build_map(&mut self);
-    fn get_map(&self) -> Map;
-    fn get_starting_position(&self) -> Position;
-    fn get_snapshot_history(&self) -> Vec<Map>;
-    fn take_snapshot(&mut self);
-    fn get_spawn_list(&self) -> &Vec<SpawnEntity>;
-
-    fn spawn_entities(&self, ecs: &mut World) {
-        for (map_idx, entity_name) in self.get_spawn_list().iter() {
-            spawner::spawn_entity(ecs, &(map_idx, entity_name));
-        }
-    }
-}
-
 pub fn random_builder(new_depth: i32, _rng: &mut RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(new_depth);
     builder.start_with(VoronoiCellBuilder::pythagoras());
