@@ -3,6 +3,7 @@ mod bsp_dungeon;
 mod bsp_interior;
 mod cellular_automata;
 pub mod common;
+mod cull_unreachable;
 mod dla;
 mod drunkard;
 mod maze;
