@@ -156,35 +156,46 @@ fn random_initial_builder(
     }
 }
 
-pub fn random_builder(new_depth: i32, rng: &mut rltk::RandomNumberGenerator) -> BuilderChain {
+pub fn random_builder(new_depth: i32, _rng: &mut rltk::RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(new_depth);
 
-    let (random_starter, has_rooms) = random_initial_builder(rng);
-
-    builder.start_with(random_starter);
-
-    if has_rooms {
-        builder.with(RoomBasedSpawner::new());
-        builder.with(RoomBasedStairs::new());
-        builder.with(RoomBasedStartingPosition::new());
-    } else {
-        builder.with(AreaStartingPosition::new(XStart::Center, YStart::Center));
-        builder.with(CullUnreachable::new());
-        builder.with(VoronoiSpawning::new());
-        builder.with(DistantExit::new());
-    }
-
-    if rng.roll_dice(1, 3) == 1 {
-        builder.with(WaveformCollapseBuilder::new());
-    }
-
-    if rng.roll_dice(1, 20) == 1 {
-        builder.with(PrefabBuilder::sectional(
-            prefab_builder::prefab_sections::UNDERGROUND_FORT,
-        ));
-    }
-
-    builder.with(PrefabBuilder::vaults());
-
+    builder.start_with(VoronoiCellBuilder::pythagoras());
+    builder.with(CellularAutomataBuilder::new());
+    builder.with(AreaStartingPosition::new(XStart::Center, YStart::Center));
+    builder.with(CullUnreachable::new());
+    builder.with(VoronoiSpawning::new());
+    builder.with(DistantExit::new());
     builder
+
+    // TODO(DP): return after tests
+    // let mut builder = BuilderChain::new(new_depth);
+    //
+    // let (random_starter, has_rooms) = random_initial_builder(rng);
+    //
+    // builder.start_with(random_starter);
+    //
+    // if has_rooms {
+    //     builder.with(RoomBasedSpawner::new());
+    //     builder.with(RoomBasedStairs::new());
+    //     builder.with(RoomBasedStartingPosition::new());
+    // } else {
+    //     builder.with(AreaStartingPosition::new(XStart::Center, YStart::Center));
+    //     builder.with(CullUnreachable::new());
+    //     builder.with(VoronoiSpawning::new());
+    //     builder.with(DistantExit::new());
+    // }
+    //
+    // if rng.roll_dice(1, 3) == 1 {
+    //     builder.with(WaveformCollapseBuilder::new());
+    // }
+    //
+    // if rng.roll_dice(1, 20) == 1 {
+    //     builder.with(PrefabBuilder::sectional(
+    //         prefab_builder::prefab_sections::UNDERGROUND_FORT,
+    //     ));
+    // }
+    //
+    // builder.with(PrefabBuilder::vaults());
+    //
+    // builder
 }
