@@ -1,3 +1,4 @@
+mod area_starting_points;
 mod bsp_dungeon;
 mod bsp_interior;
 mod cellular_automata;
