@@ -146,7 +146,7 @@ pub trait MapBuilder {
 
 pub fn random_builder(new_depth: i32, _rng: &mut RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(new_depth);
-    builder.start_with(CellularAutomataBuilder::new());
+    builder.start_with(DrunkardsWalkBuilder::fearful_symmetry());
     builder.with(AreaStartingPosition::new(XStart::Center, YStart::Center));
     builder.with(CullUnreachable::new());
     builder.with(VoronoiSpawning::new());
