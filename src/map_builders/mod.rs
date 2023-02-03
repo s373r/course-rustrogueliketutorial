@@ -13,6 +13,7 @@ mod room_based_stairs;
 mod room_based_starting_position;
 mod simple_map;
 mod voronoi;
+mod voronoi_spawning;
 mod waveform_collapse;
 
 use rltk::RandomNumberGenerator;
