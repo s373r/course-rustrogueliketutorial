@@ -6,8 +6,8 @@ use std::collections::HashSet;
 
 use crate::components::Position;
 use crate::map::TileType;
-use crate::map_builders::BuilderMap;
 use crate::map_builders::MetaMapBuilder;
+use crate::map_builders::{BuilderMap, InitialMapBuilder};
 
 #[derive(PartialEq, Clone)]
 #[allow(dead_code)]
@@ -29,6 +29,13 @@ pub struct PrefabBuilder {
 }
 
 impl MetaMapBuilder for PrefabBuilder {
+    fn build_map(&mut self, rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
+        self.build(rng, build_data);
+    }
+}
+
+impl InitialMapBuilder for PrefabBuilder {
+    #[allow(dead_code)]
     fn build_map(&mut self, rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
         self.build(rng, build_data);
     }
