@@ -22,10 +22,13 @@ use specs::World;
 
 use crate::components::Position;
 use crate::map::Map;
+use crate::map_builders::area_starting_points::{AreaStartingPosition, XStart, YStart};
 use crate::map_builders::bsp_dungeon::BspDungeonBuilder;
 use crate::map_builders::bsp_interior::BspInteriorBuilder;
 use crate::map_builders::cellular_automata::CellularAutomataBuilder;
 use crate::map_builders::common::SpawnEntity;
+use crate::map_builders::cull_unreachable::CullUnreachable;
+use crate::map_builders::distant_exit::DistantExit;
 use crate::map_builders::dla::DLABuilder;
 use crate::map_builders::drunkard::DrunkardsWalkBuilder;
 use crate::map_builders::maze::MazeBuilder;
@@ -35,6 +38,7 @@ use crate::map_builders::room_based_stairs::RoomBasedStairs;
 use crate::map_builders::room_based_starting_position::RoomBasedStartingPosition;
 use crate::map_builders::simple_map::SimpleMapBuilder;
 use crate::map_builders::voronoi::VoronoiCellBuilder;
+use crate::map_builders::voronoi_spawning::VoronoiSpawning;
 use crate::map_builders::waveform_collapse::WaveformCollapseBuilder;
 use crate::rect::Rect;
 use crate::{spawner, SHOW_MAPGEN_VISUALIZER};
@@ -142,10 +146,11 @@ pub trait MapBuilder {
 
 pub fn random_builder(new_depth: i32, _rng: &mut RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(new_depth);
-    builder.start_with(BspInteriorBuilder::new());
-    builder.with(RoomBasedSpawner::new());
-    builder.with(RoomBasedStartingPosition::new());
-    builder.with(RoomBasedStairs::new());
+    builder.start_with(CellularAutomataBuilder::new());
+    builder.with(AreaStartingPosition::new(XStart::Center, YStart::Center));
+    builder.with(CullUnreachable::new());
+    builder.with(VoronoiSpawning::new());
+    builder.with(DistantExit::new());
     builder
 
     // TODO(DP): remove completely after migration
