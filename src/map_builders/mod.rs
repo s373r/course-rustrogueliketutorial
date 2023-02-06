@@ -137,76 +137,133 @@ impl BuilderChain {
     }
 }
 
-fn random_initial_builder(
-    rng: &mut rltk::RandomNumberGenerator,
-) -> (Box<dyn InitialMapBuilder>, bool) {
-    let builder = rng.roll_dice(1, 17);
+fn random_start_position(rng: &mut rltk::RandomNumberGenerator) -> (XStart, YStart) {
+    let x_roll = rng.roll_dice(1, 3);
+    let x = match x_roll {
+        1 => XStart::Left,
+        2 => XStart::Center,
+        _ => XStart::Right,
+    };
 
-    match builder {
-        1 => (BspDungeonBuilder::new(), true),
-        2 => (BspInteriorBuilder::new(), true),
-        3 => (CellularAutomataBuilder::new(), false),
-        4 => (DrunkardsWalkBuilder::open_area(), false),
-        5 => (DrunkardsWalkBuilder::open_halls(), false),
-        6 => (DrunkardsWalkBuilder::winding_passages(), false),
-        7 => (DrunkardsWalkBuilder::fat_passages(), false),
-        8 => (DrunkardsWalkBuilder::fearful_symmetry(), false),
-        9 => (MazeBuilder::new(), false),
-        10 => (DLABuilder::walk_inwards(), false),
-        11 => (DLABuilder::walk_outwards(), false),
-        12 => (DLABuilder::central_attractor(), false),
-        13 => (DLABuilder::insectoid(), false),
-        14 => (VoronoiCellBuilder::pythagoras(), false),
-        15 => (VoronoiCellBuilder::manhattan(), false),
-        16 => (
-            PrefabBuilder::constant(prefab_builder::prefab_levels::WFC_POPULATED),
-            false,
-        ),
-        _ => (SimpleMapBuilder::new(), true),
+    let y_roll = rng.roll_dice(1, 3);
+    let y = match y_roll {
+        1 => YStart::Bottom,
+        2 => YStart::Center,
+        _ => YStart::Top,
+    };
+
+    (x, y)
+}
+
+fn random_room_builder(rng: &mut rltk::RandomNumberGenerator, builder: &mut BuilderChain) {
+    let build_roll = rng.roll_dice(1, 3);
+    match build_roll {
+        1 => builder.start_with(SimpleMapBuilder::new()),
+        2 => builder.start_with(BspDungeonBuilder::new()),
+        _ => builder.start_with(BspInteriorBuilder::new()),
+    }
+
+    // BSP Interior still makes holes in the walls
+    if build_roll != 3 {
+        // Sort by one of the 5 available algorithms
+        let sort_roll = rng.roll_dice(1, 5);
+        match sort_roll {
+            1 => builder.with(RoomSorter::new(RoomSort::Leftmost)),
+            2 => builder.with(RoomSorter::new(RoomSort::Rightmost)),
+            3 => builder.with(RoomSorter::new(RoomSort::Topmost)),
+            4 => builder.with(RoomSorter::new(RoomSort::Bottommost)),
+            _ => builder.with(RoomSorter::new(RoomSort::Central)),
+        }
+
+        let corridor_roll = rng.roll_dice(1, 2);
+        match corridor_roll {
+            1 => builder.with(DoglegCorridors::new()),
+            _ => builder.with(BspCorridors::new()),
+        }
+
+        let modifier_roll = rng.roll_dice(1, 6);
+        match modifier_roll {
+            1 => builder.with(RoomExploder::new()),
+            2 => builder.with(RoomCornerRounder::new()),
+            _ => {}
+        }
+    }
+
+    let start_roll = rng.roll_dice(1, 2);
+    match start_roll {
+        1 => builder.with(RoomBasedStartingPosition::new()),
+        _ => {
+            let (start_x, start_y) = random_start_position(rng);
+            builder.with(AreaStartingPosition::new(start_x, start_y));
+        }
+    }
+
+    let exit_roll = rng.roll_dice(1, 2);
+    match exit_roll {
+        1 => builder.with(RoomBasedStairs::new()),
+        _ => builder.with(DistantExit::new()),
+    }
+
+    let spawn_roll = rng.roll_dice(1, 2);
+    match spawn_roll {
+        1 => builder.with(RoomBasedSpawner::new()),
+        _ => builder.with(VoronoiSpawning::new()),
     }
 }
 
-pub fn random_builder(new_depth: i32, _rng: &mut rltk::RandomNumberGenerator) -> BuilderChain {
-    let mut builder = BuilderChain::new(new_depth);
+fn random_shape_builder(rng: &mut rltk::RandomNumberGenerator, builder: &mut BuilderChain) {
+    let builder_roll = rng.roll_dice(1, 16);
+    match builder_roll {
+        1 => builder.start_with(CellularAutomataBuilder::new()),
+        2 => builder.start_with(DrunkardsWalkBuilder::open_area()),
+        3 => builder.start_with(DrunkardsWalkBuilder::open_halls()),
+        4 => builder.start_with(DrunkardsWalkBuilder::winding_passages()),
+        5 => builder.start_with(DrunkardsWalkBuilder::fat_passages()),
+        6 => builder.start_with(DrunkardsWalkBuilder::fearful_symmetry()),
+        7 => builder.start_with(MazeBuilder::new()),
+        8 => builder.start_with(DLABuilder::walk_inwards()),
+        9 => builder.start_with(DLABuilder::walk_outwards()),
+        10 => builder.start_with(DLABuilder::central_attractor()),
+        11 => builder.start_with(DLABuilder::insectoid()),
+        12 => builder.start_with(VoronoiCellBuilder::pythagoras()),
+        13 => builder.start_with(VoronoiCellBuilder::manhattan()),
+        _ => builder.start_with(PrefabBuilder::constant(
+            prefab_builder::prefab_levels::WFC_POPULATED,
+        )),
+    }
 
-    builder.start_with(BspDungeonBuilder::new());
-    builder.with(RoomSorter::new(RoomSort::Central));
-    builder.with(BspCorridors::new());
-    builder.with(RoomBasedSpawner::new());
-    builder.with(RoomBasedStairs::new());
-    builder.with(RoomBasedStartingPosition::new());
+    // Set the start to the center and cull
+    builder.with(AreaStartingPosition::new(XStart::Center, YStart::Center));
+    builder.with(CullUnreachable::new());
+
+    // Now set the start to a random starting area
+    let (start_x, start_y) = random_start_position(rng);
+    builder.with(AreaStartingPosition::new(start_x, start_y));
+
+    // Setup an exit and spawn mobs
+    builder.with(VoronoiSpawning::new());
+    builder.with(DistantExit::new());
+}
+
+pub fn random_builder(new_depth: i32, rng: &mut rltk::RandomNumberGenerator) -> BuilderChain {
+    let mut builder = BuilderChain::new(new_depth);
+    let type_roll = rng.roll_dice(1, 2);
+    match type_roll {
+        1 => random_room_builder(rng, &mut builder),
+        _ => random_shape_builder(rng, &mut builder),
+    }
+
+    if rng.roll_dice(1, 3) == 1 {
+        builder.with(WaveformCollapseBuilder::new());
+    }
+
+    if rng.roll_dice(1, 20) == 1 {
+        builder.with(PrefabBuilder::sectional(
+            prefab_builder::prefab_sections::UNDERGROUND_FORT,
+        ));
+    }
+
+    builder.with(PrefabBuilder::vaults());
 
     builder
-
-    // TODO(DP): return after tests
-    // let mut builder = BuilderChain::new(new_depth);
-    //
-    // let (random_starter, has_rooms) = random_initial_builder(rng);
-    //
-    // builder.start_with(random_starter);
-    //
-    // if has_rooms {
-    //     builder.with(RoomBasedSpawner::new());
-    //     builder.with(RoomBasedStairs::new());
-    //     builder.with(RoomBasedStartingPosition::new());
-    // } else {
-    //     builder.with(AreaStartingPosition::new(XStart::Center, YStart::Center));
-    //     builder.with(CullUnreachable::new());
-    //     builder.with(VoronoiSpawning::new());
-    //     builder.with(DistantExit::new());
-    // }
-    //
-    // if rng.roll_dice(1, 3) == 1 {
-    //     builder.with(WaveformCollapseBuilder::new());
-    // }
-    //
-    // if rng.roll_dice(1, 20) == 1 {
-    //     builder.with(PrefabBuilder::sectional(
-    //         prefab_builder::prefab_sections::UNDERGROUND_FORT,
-    //     ));
-    // }
-    //
-    // builder.with(PrefabBuilder::vaults());
-    //
-    // builder
 }
