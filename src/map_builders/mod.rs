@@ -14,6 +14,8 @@ mod room_based_stairs;
 mod room_based_starting_position;
 mod room_corner_rounding;
 mod room_exploder;
+mod room_sorter;
+mod rooms_corridors_bsp;
 mod rooms_corridors_dogleg;
 mod simple_map;
 mod voronoi;
@@ -39,6 +41,8 @@ use crate::map_builders::room_based_stairs::RoomBasedStairs;
 use crate::map_builders::room_based_starting_position::RoomBasedStartingPosition;
 use crate::map_builders::room_corner_rounding::RoomCornerRounder;
 use crate::map_builders::room_exploder::RoomExploder;
+use crate::map_builders::room_sorter::RoomSorter;
+use crate::map_builders::rooms_corridors_bsp::BspCorridors;
 use crate::map_builders::rooms_corridors_dogleg::DoglegCorridors;
 use crate::map_builders::simple_map::SimpleMapBuilder;
 use crate::map_builders::voronoi::VoronoiCellBuilder;
@@ -165,8 +169,9 @@ fn random_initial_builder(
 pub fn random_builder(new_depth: i32, _rng: &mut rltk::RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(new_depth);
 
-    builder.start_with(SimpleMapBuilder::new());
-    builder.with(DoglegCorridors::new());
+    builder.start_with(BspDungeonBuilder::new());
+    builder.with(RoomSorter::new());
+    builder.with(BspCorridors::new());
     builder.with(RoomBasedSpawner::new());
     builder.with(RoomBasedStairs::new());
     builder.with(RoomBasedStartingPosition::new());
