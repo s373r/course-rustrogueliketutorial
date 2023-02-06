@@ -33,6 +33,7 @@ use crate::map_builders::area_starting_points::{AreaStartingPosition, XStart, YS
 use crate::map_builders::bsp_dungeon::BspDungeonBuilder;
 use crate::map_builders::bsp_interior::BspInteriorBuilder;
 use crate::map_builders::cellular_automata::CellularAutomataBuilder;
+use crate::map_builders::common::Corridor;
 use crate::map_builders::cull_unreachable::CullUnreachable;
 use crate::map_builders::distant_exit::DistantExit;
 use crate::map_builders::dla::DLABuilder;
@@ -70,6 +71,7 @@ pub struct BuilderMap {
     pub map: Map,
     pub starting_position: Option<Position>,
     pub rooms: Option<Vec<Rect>>,
+    pub corridors: Option<Vec<Corridor>>,
     pub history: Vec<Map>,
 }
 
@@ -104,6 +106,7 @@ impl BuilderChain {
                 map: Map::new(new_depth),
                 starting_position: None,
                 rooms: None,
+                corridors: None,
                 history: Vec::new(),
             },
         }

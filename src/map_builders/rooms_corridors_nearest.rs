@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::map_builders::common::draw_corridor;
+use crate::map_builders::common::{draw_corridor, Corridor};
 use crate::map_builders::{BuilderMap, MetaMapBuilder};
 
 pub struct NearestCorridors {}
@@ -25,6 +25,7 @@ impl NearestCorridors {
         let rooms = rooms_builder.clone();
 
         let mut connected: HashSet<usize> = HashSet::new();
+        let mut corridors: Vec<Corridor> = Vec::new();
         for (i, room) in rooms.iter().enumerate() {
             let mut room_distance = Vec::new();
             let room_center = {
@@ -53,8 +54,7 @@ impl NearestCorridors {
 
             let (closest_room_idx, _) = room_distance[0];
             let (dest_center_x, dest_center_y) = rooms[closest_room_idx].center();
-
-            draw_corridor(
+            let corridor = draw_corridor(
                 &mut build_data.map,
                 room_center.x,
                 room_center.y,
@@ -62,8 +62,10 @@ impl NearestCorridors {
                 dest_center_y,
             );
 
+            corridors.push(corridor);
             connected.insert(i);
             build_data.take_snapshot();
         }
+        build_data.corridors = Some(corridors);
     }
 }

@@ -1,7 +1,7 @@
 use crate::map::TileType;
 use std::collections::HashSet;
 
-use crate::map_builders::common::draw_corridor;
+use crate::map_builders::common::Corridor;
 use crate::map_builders::{BuilderMap, MetaMapBuilder};
 
 pub struct StraightLineCorridors {}
@@ -27,6 +27,7 @@ impl StraightLineCorridors {
         let rooms = rooms_builder.clone();
 
         let mut connected: HashSet<usize> = HashSet::new();
+        let mut corridors: Vec<Corridor> = Vec::new();
         for (i, room) in rooms.iter().enumerate() {
             let mut room_distance = Vec::new();
             let room_center = {
@@ -60,13 +61,19 @@ impl StraightLineCorridors {
                 room_center,
                 rltk::Point::new(dest_center_x, dest_center_y),
             );
+            let mut corridor = Corridor::new();
             for cell in line.iter() {
                 let idx = build_data.map.xy_idx(cell.x, cell.y);
-                build_data.map.tiles[idx] = TileType::Floor;
+                if build_data.map.tiles[idx] != TileType::Floor {
+                    build_data.map.tiles[idx] = TileType::Floor;
+                    corridor.push(idx);
+                }
             }
 
+            corridors.push(corridor);
             connected.insert(i);
             build_data.take_snapshot();
         }
+        build_data.corridors = Some(corridors);
     }
 }

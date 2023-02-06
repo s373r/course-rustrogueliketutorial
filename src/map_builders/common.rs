@@ -3,6 +3,7 @@ use std::cmp::{max, min};
 use crate::map::{Map, TileType};
 
 pub type SpawnEntity = (/* map_idx */ usize, /* entity_name */ String);
+pub type Corridor = Vec</* map_idx */ usize>;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum Symmetry {
@@ -13,22 +14,28 @@ pub enum Symmetry {
     Both,
 }
 
-pub fn apply_horizontal_tunnel(map: &mut Map, x1: i32, x2: i32, y: i32) {
+pub fn apply_horizontal_tunnel(map: &mut Map, x1: i32, x2: i32, y: i32) -> Corridor {
+    let mut corridor = Corridor::new();
     for x in min(x1, x2)..=max(x1, x2) {
         let idx = map.xy_idx(x, y);
         if map.is_valid_idx(idx) {
             map.tiles[idx] = TileType::Floor;
+            corridor.push(idx);
         }
     }
+    corridor
 }
 
-pub fn apply_vertical_tunnel(map: &mut Map, y1: i32, y2: i32, x: i32) {
+pub fn apply_vertical_tunnel(map: &mut Map, y1: i32, y2: i32, x: i32) -> Corridor {
+    let mut corridor = Corridor::new();
     for y in min(y1, y2)..=max(y1, y2) {
         let idx = map.xy_idx(x, y);
         if map.is_valid_idx(idx) {
             map.tiles[idx] = TileType::Floor;
+            corridor.push(idx);
         }
     }
+    corridor
 }
 
 pub fn paint(map: &mut Map, symmetry: Symmetry, brush_size: i32, x: i32, y: i32) {
@@ -106,7 +113,8 @@ fn apply_paint(map: &mut Map, brush_size: i32, x: i32, y: i32) {
     }
 }
 
-pub fn draw_corridor(map: &mut Map, x1: i32, y1: i32, x2: i32, y2: i32) {
+pub fn draw_corridor(map: &mut Map, x1: i32, y1: i32, x2: i32, y2: i32) -> Corridor {
+    let mut corridor = Corridor::new();
     let mut x = x1;
     let mut y = y1;
 
@@ -122,6 +130,11 @@ pub fn draw_corridor(map: &mut Map, x1: i32, y1: i32, x2: i32, y2: i32) {
         }
 
         let idx = map.xy_idx(x, y);
-        map.tiles[idx] = TileType::Floor;
+        if map.tiles[idx] != TileType::Floor {
+            corridor.push(idx);
+            map.tiles[idx] = TileType::Floor;
+        }
     }
+
+    corridor
 }
