@@ -13,6 +13,7 @@ mod room_based_spawner;
 mod room_based_stairs;
 mod room_based_starting_position;
 mod room_corner_rounding;
+mod room_corridor_spawner;
 mod room_draw;
 mod room_exploder;
 mod room_sorter;
@@ -44,6 +45,7 @@ use crate::map_builders::room_based_spawner::RoomBasedSpawner;
 use crate::map_builders::room_based_stairs::RoomBasedStairs;
 use crate::map_builders::room_based_starting_position::RoomBasedStartingPosition;
 use crate::map_builders::room_corner_rounding::RoomCornerRounder;
+use crate::map_builders::room_corridor_spawner::CorridorSpawner;
 use crate::map_builders::room_draw::RoomDrawer;
 use crate::map_builders::room_exploder::RoomExploder;
 use crate::map_builders::room_sorter::{RoomSort, RoomSorter};
@@ -263,6 +265,7 @@ pub fn random_builder(new_depth: i32, _rng: &mut rltk::RandomNumberGenerator) ->
     builder.with(RoomSorter::new(RoomSort::Leftmost));
     builder.with(StraightLineCorridors::new());
     builder.with(RoomBasedSpawner::new());
+    builder.with(CorridorSpawner::new());
     builder.with(RoomBasedStairs::new());
     builder.with(RoomBasedStartingPosition::new());
     builder
