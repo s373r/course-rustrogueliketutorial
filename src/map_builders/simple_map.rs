@@ -39,7 +39,8 @@ impl SimpleMapBuilder {
                 continue;
             }
 
-            build_data.take_snapshot();
+            // NOTE(DP): this is not take any effect but slowdown map generation rendering
+            // build_data.take_snapshot();
 
             rooms.push(new_room);
         }
