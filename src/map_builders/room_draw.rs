@@ -16,14 +16,18 @@ impl RoomDrawer {
         Box::new(RoomDrawer {})
     }
 
-    fn build(&mut self, _rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
+    fn build(&mut self, rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
         let Some(rooms_builder) = &build_data.rooms else {
             panic!("Room Rounding require a builder with room structures");
         };
         let rooms = rooms_builder.clone();
 
         for room in rooms.iter() {
-            self.circle(build_data, room);
+            let room_type = rng.roll_dice(1, 4);
+            match room_type {
+                1 => self.circle(build_data, room),
+                _ => self.rectangle(build_data, room),
+            }
             build_data.take_snapshot();
         }
     }
