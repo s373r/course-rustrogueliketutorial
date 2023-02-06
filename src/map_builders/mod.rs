@@ -13,6 +13,7 @@ mod room_based_spawner;
 mod room_based_stairs;
 mod room_based_starting_position;
 mod room_corner_rounding;
+mod room_draw;
 mod room_exploder;
 mod room_sorter;
 mod rooms_corridors_bsp;
@@ -40,6 +41,7 @@ use crate::map_builders::room_based_spawner::RoomBasedSpawner;
 use crate::map_builders::room_based_stairs::RoomBasedStairs;
 use crate::map_builders::room_based_starting_position::RoomBasedStartingPosition;
 use crate::map_builders::room_corner_rounding::RoomCornerRounder;
+use crate::map_builders::room_draw::RoomDrawer;
 use crate::map_builders::room_exploder::RoomExploder;
 use crate::map_builders::room_sorter::{RoomSort, RoomSorter};
 use crate::map_builders::rooms_corridors_bsp::BspCorridors;
@@ -245,25 +247,38 @@ fn random_shape_builder(rng: &mut rltk::RandomNumberGenerator, builder: &mut Bui
     builder.with(DistantExit::new());
 }
 
-pub fn random_builder(new_depth: i32, rng: &mut rltk::RandomNumberGenerator) -> BuilderChain {
+pub fn random_builder(new_depth: i32, _rng: &mut rltk::RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(new_depth);
-    let type_roll = rng.roll_dice(1, 2);
-    match type_roll {
-        1 => random_room_builder(rng, &mut builder),
-        _ => random_shape_builder(rng, &mut builder),
-    }
 
-    if rng.roll_dice(1, 3) == 1 {
-        builder.with(WaveformCollapseBuilder::new());
-    }
-
-    if rng.roll_dice(1, 20) == 1 {
-        builder.with(PrefabBuilder::sectional(
-            prefab_builder::prefab_sections::UNDERGROUND_FORT,
-        ));
-    }
-
-    builder.with(PrefabBuilder::vaults());
+    builder.start_with(SimpleMapBuilder::new());
+    builder.with(RoomDrawer::new());
+    builder.with(RoomSorter::new(RoomSort::Leftmost));
+    builder.with(BspCorridors::new());
+    builder.with(RoomBasedSpawner::new());
+    builder.with(RoomBasedStairs::new());
+    builder.with(RoomBasedStartingPosition::new());
 
     builder
+
+    // TODO(DP): return after tests
+    // let mut builder = BuilderChain::new(new_depth);
+    // let type_roll = rng.roll_dice(1, 2);
+    // match type_roll {
+    //     1 => random_room_builder(rng, &mut builder),
+    //     _ => random_shape_builder(rng, &mut builder),
+    // }
+    //
+    // if rng.roll_dice(1, 3) == 1 {
+    //     builder.with(WaveformCollapseBuilder::new());
+    // }
+    //
+    // if rng.roll_dice(1, 20) == 1 {
+    //     builder.with(PrefabBuilder::sectional(
+    //         prefab_builder::prefab_sections::UNDERGROUND_FORT,
+    //     ));
+    // }
+    //
+    // builder.with(PrefabBuilder::vaults());
+    //
+    // builder
 }

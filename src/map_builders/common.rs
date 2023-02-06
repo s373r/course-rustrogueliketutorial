@@ -1,7 +1,6 @@
 use std::cmp::{max, min};
 
 use crate::map::{Map, TileType};
-use crate::rect::Rect;
 
 pub type SpawnEntity = (/* map_idx */ usize, /* entity_name */ String);
 
@@ -14,20 +13,11 @@ pub enum Symmetry {
     Both,
 }
 
-pub fn apply_room(map: &mut Map, room: &Rect) {
-    for y in room.y1 + 1..=room.y2 {
-        for x in room.x1 + 1..=room.x2 {
-            let idx = map.xy_idx(x, y);
-
-            map.tiles[idx] = TileType::Floor;
-        }
-    }
-}
-
 pub fn apply_horizontal_tunnel(map: &mut Map, x1: i32, x2: i32, y: i32) {
     for x in min(x1, x2)..=max(x1, x2) {
         let idx = map.xy_idx(x, y);
 
+        // TODO(DP): use Map::is_valid_idx()
         if idx > 0 && idx < Map::LENGTH {
             map.tiles[idx] = TileType::Floor;
         }
@@ -38,6 +28,7 @@ pub fn apply_vertical_tunnel(map: &mut Map, y1: i32, y2: i32, x: i32) {
     for y in min(y1, y2)..=max(y1, y2) {
         let idx = map.xy_idx(x, y);
 
+        // TODO(DP): use Map::is_valid_idx()
         if idx > 0 && idx < Map::LENGTH {
             map.tiles[idx] = TileType::Floor;
         }

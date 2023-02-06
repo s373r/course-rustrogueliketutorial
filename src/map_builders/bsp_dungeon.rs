@@ -1,7 +1,6 @@
 use rltk::RandomNumberGenerator;
 
-use crate::map::{Map, TileType};
-use crate::map_builders::common::apply_room;
+use crate::map::TileType;
 use crate::map_builders::{BuilderMap, InitialMapBuilder};
 use crate::rect::Rect;
 
@@ -43,13 +42,10 @@ impl BspDungeonBuilder {
             let rect = self.get_random_rect(rng);
             let candidate = self.get_random_sub_rect(rect, rng);
 
-            if self.is_possible(candidate, &build_data.map) {
-                apply_room(&mut build_data.map, &candidate);
-
+            if self.is_possible(candidate, build_data, &rooms) {
                 rooms.push(candidate);
 
                 self.add_subrects(rect);
-                build_data.take_snapshot();
             }
 
             n_rooms += 1;
@@ -112,7 +108,7 @@ impl BspDungeonBuilder {
         result
     }
 
-    fn is_possible(&self, rect: Rect, map: &Map) -> bool {
+    fn is_possible(&self, rect: Rect, build_data: &BuilderMap, rooms: &[Rect]) -> bool {
         let mut expanded = rect;
 
         expanded.x1 -= 2;
@@ -120,12 +116,18 @@ impl BspDungeonBuilder {
         expanded.y1 -= 2;
         expanded.y2 += 2;
 
+        for room in rooms.iter() {
+            if room.intersect(&rect) {
+                return false;
+            }
+        }
+
         for y in expanded.y1..=expanded.y2 {
             for x in expanded.x1..=expanded.x2 {
-                if x > map.width - 2 {
+                if x > build_data.map.width - 2 {
                     return false;
                 }
-                if y > map.height - 2 {
+                if y > build_data.map.height - 2 {
                     return false;
                 }
                 if x < 1 {
@@ -135,9 +137,9 @@ impl BspDungeonBuilder {
                     return false;
                 }
 
-                let idx = map.xy_idx(x, y);
+                let idx = build_data.map.xy_idx(x, y);
 
-                if map.tiles[idx] != TileType::Wall {
+                if build_data.map.tiles[idx] != TileType::Wall {
                     return false;
                 }
             }

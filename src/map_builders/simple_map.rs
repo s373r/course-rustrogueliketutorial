@@ -1,6 +1,5 @@
 use rltk::RandomNumberGenerator;
 
-use crate::map_builders::common::*;
 use crate::map_builders::{BuilderMap, InitialMapBuilder};
 use crate::rect::Rect;
 
@@ -39,8 +38,6 @@ impl SimpleMapBuilder {
             if has_intersect_other_rooms {
                 continue;
             }
-
-            apply_room(&mut build_data.map, &new_room);
 
             build_data.take_snapshot();
 
