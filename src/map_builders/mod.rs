@@ -41,7 +41,7 @@ use crate::map_builders::room_based_stairs::RoomBasedStairs;
 use crate::map_builders::room_based_starting_position::RoomBasedStartingPosition;
 use crate::map_builders::room_corner_rounding::RoomCornerRounder;
 use crate::map_builders::room_exploder::RoomExploder;
-use crate::map_builders::room_sorter::RoomSorter;
+use crate::map_builders::room_sorter::{RoomSort, RoomSorter};
 use crate::map_builders::rooms_corridors_bsp::BspCorridors;
 use crate::map_builders::rooms_corridors_dogleg::DoglegCorridors;
 use crate::map_builders::simple_map::SimpleMapBuilder;
@@ -170,7 +170,7 @@ pub fn random_builder(new_depth: i32, _rng: &mut rltk::RandomNumberGenerator) ->
     let mut builder = BuilderChain::new(new_depth);
 
     builder.start_with(BspDungeonBuilder::new());
-    builder.with(RoomSorter::new());
+    builder.with(RoomSorter::new(RoomSort::Central));
     builder.with(BspCorridors::new());
     builder.with(RoomBasedSpawner::new());
     builder.with(RoomBasedStairs::new());
