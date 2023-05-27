@@ -18,6 +18,7 @@ impl<'a> System<'a> for VisibilitySystem {
         WriteExpect<'a, rltk::RandomNumberGenerator>,
         WriteExpect<'a, GameLog>,
         ReadStorage<'a, Name>,
+        ReadStorage<'a, BlocksVisibility>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
@@ -31,7 +32,15 @@ impl<'a> System<'a> for VisibilitySystem {
             mut rng,
             mut game_log,
             names,
+            blocks_visibility,
         ) = data;
+
+        map.view_blocked.clear();
+        for (block_pos, _) in (&pos, &blocks_visibility).join() {
+            let idx = map.xy_idx(block_pos.x, block_pos.y);
+
+            map.view_blocked.insert(idx);
+        }
 
         // TODO(DP): use early ~~returns~~ continues
         for (ent, viewshed, pos) in (&entities, &mut viewshed, &pos).join() {

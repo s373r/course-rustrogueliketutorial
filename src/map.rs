@@ -20,6 +20,7 @@ pub struct Map {
     pub blocked: Vec<bool>,
     pub depth: i32,
     pub bloodstains: HashSet<usize>,
+    pub view_blocked: HashSet<usize>,
 
     #[serde(skip_serializing)]
     #[serde(skip_deserializing)]
@@ -74,6 +75,7 @@ impl Map {
             tile_content: vec![Vec::new(); Map::LENGTH],
             depth: new_depth,
             bloodstains: HashSet::new(),
+            view_blocked: HashSet::new(),
         }
     }
 }
@@ -86,7 +88,7 @@ impl Algorithm2D for Map {
 
 impl BaseMap for Map {
     fn is_opaque(&self, idx: usize) -> bool {
-        self.tiles[idx] == TileType::Wall
+        self.tiles[idx] == TileType::Wall || self.view_blocked.contains(&idx)
     }
 
     fn get_available_exits(&self, idx: usize) -> rltk::SmallVec<[(usize, f32); 10]> {
