@@ -100,7 +100,9 @@ pub fn save_game(ecs: &mut World) {
             Hidden,
             EntryTrigger,
             EntityMoved,
-            SingleActivation
+            SingleActivation,
+            BlocksVisibility,
+            Door
         );
     }
 

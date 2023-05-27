@@ -584,6 +584,8 @@ fn main() -> rltk::BError {
     gs.ecs.register::<EntryTrigger>();
     gs.ecs.register::<EntityMoved>();
     gs.ecs.register::<SingleActivation>();
+    gs.ecs.register::<BlocksVisibility>();
+    gs.ecs.register::<Door>();
 
     // Placeholders for Map and player position
     gs.ecs.insert(Map::new(1));
