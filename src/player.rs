@@ -15,6 +15,10 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     let entities = ecs.entities();
     let mut wants_to_melee = ecs.write_storage::<WantsToMelee>();
     let mut entity_moved = ecs.write_storage::<EntityMoved>();
+    let mut doors = ecs.write_storage::<Door>();
+    let mut blocks_visibility = ecs.write_storage::<BlocksVisibility>();
+    let mut blocks_movement = ecs.write_storage::<BlocksTile>();
+    let mut renderables = ecs.write_storage::<Renderable>();
 
     for (entity, _player, pos, viewshed) in
         (&entities, &mut players, &mut positions, &mut viewsheds).join()
@@ -45,6 +49,18 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
                     )
                     .expect("Add target failed");
                 return;
+            }
+
+            if let Some(door) = doors.get_mut(*potential_target) {
+                door.open = true;
+
+                blocks_visibility.remove(*potential_target);
+                blocks_movement.remove(*potential_target);
+
+                let glyph = renderables.get_mut(*potential_target).unwrap();
+
+                glyph.glyph = rltk::to_cp437('/');
+                viewshed.dirty = true;
             }
         }
 
