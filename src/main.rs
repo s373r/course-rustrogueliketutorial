@@ -1,3 +1,4 @@
+mod camera;
 mod components;
 mod damage_system;
 mod game_log;
@@ -277,29 +278,7 @@ impl GameState for State {
         match run_state {
             RunState::MainMenu { .. } | RunState::GameOver { .. } => {}
             _ => {
-                draw_map(&self.ecs.fetch::<Map>(), ctx);
-
-                let positions = self.ecs.read_storage::<Position>();
-                let renderables = self.ecs.read_storage::<Renderable>();
-                let hidden = self.ecs.read_storage::<Hidden>();
-                let map = self.ecs.fetch::<Map>();
-
-                let mut positional_renderables = (&positions, &renderables, !&hidden)
-                    .join()
-                    .collect::<Vec<_>>();
-
-                positional_renderables.sort_by(|(_, left, _), (_, right, _)| {
-                    right.render_order.cmp(&left.render_order)
-                });
-
-                for (pos, render, _) in positional_renderables.iter() {
-                    let idx = map.xy_idx(pos.x, pos.y);
-
-                    if map.visible_tiles[idx] {
-                        ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph)
-                    }
-                }
-
+                camera::render_camera(&self.ecs, ctx);
                 gui::draw_ui(&self.ecs, ctx)
             }
         }
