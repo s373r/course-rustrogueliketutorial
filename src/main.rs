@@ -221,7 +221,7 @@ impl State {
         // self.mapgen_history.clear();
 
         let mut rng = self.ecs.write_resource::<RandomNumberGenerator>();
-        let mut builder = map_builders::random_builder(new_depth, &mut rng);
+        let mut builder = map_builders::random_builder(new_depth, &mut rng, 64, 64);
         builder.build_map(&mut rng);
         drop(rng);
 
@@ -446,13 +446,13 @@ impl GameState for State {
             RunState::MagicMapReveal { row } => {
                 let mut map = self.ecs.fetch_mut::<Map>();
 
-                for x in 0..Map::WIDTH {
-                    let idx = map.xy_idx(x as i32, row);
+                for x in 0..map.width {
+                    let idx = map.xy_idx(x, row);
 
                     map.revealed_tiles[idx] = true;
                 }
 
-                if row as usize == Map::HEIGHT - 1 {
+                if row == map.height - 1 {
                     RunState::MonsterTurn
                 } else {
                     RunState::MagicMapReveal { row: row + 1 }
@@ -567,7 +567,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Door>();
 
     // Placeholders for Map and player position
-    gs.ecs.insert(Map::new(1));
+    gs.ecs.insert(Map::new(1, 64, 64));
     gs.ecs.insert(Point::new(0, 0));
 
     gs.ecs.insert(SimpleMarkerAllocator::<SerializeMe>::new());

@@ -370,8 +370,14 @@ fn door(ecs: &mut World, x: i32, y: i32) {
 
 /// Spawns a named entity (name in tuple.1) at the location in (tuple.0)
 pub fn spawn_entity(ecs: &mut World, (map_idx, entity_name): &(&usize, &String)) {
-    let x = (*map_idx % Map::WIDTH) as i32;
-    let y = (*map_idx / Map::WIDTH) as i32;
+    let (x, y) = {
+        let map = ecs.fetch::<Map>();
+        let width = map.width as usize;
+        let x = (*map_idx % width) as i32;
+        let y = (*map_idx / width) as i32;
+
+        (x, y)
+    };
 
     match entity_name.as_ref() {
         "Goblin" => goblin(ecs, x, y),

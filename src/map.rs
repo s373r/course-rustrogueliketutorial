@@ -15,6 +15,7 @@ pub struct Map {
     pub tiles: Vec<TileType>,
     pub width: i32,
     pub height: i32,
+    pub map_length: usize,
     pub revealed_tiles: Vec<bool>,
     pub visible_tiles: Vec<bool>,
     pub blocked: Vec<bool>,
@@ -28,17 +29,13 @@ pub struct Map {
 }
 
 impl Map {
-    pub const WIDTH: usize = 64;
-    pub const HEIGHT: usize = 64;
-    pub const LENGTH: usize = Map::HEIGHT * Map::WIDTH;
-
     pub fn xy_idx(&self, x: i32, y: i32) -> usize {
-        (y as usize * Self::WIDTH) + x as usize
+        (y * self.width) as usize + x as usize
     }
 
     // NOTE(DP): helper method
     pub fn is_valid_idx(&self, idx: usize) -> bool {
-        idx > 0 && idx < (Self::LENGTH - 1)
+        idx > 0 && idx < (self.map_length - 1)
     }
 
     fn is_exit_valid(&self, x: i32, y: i32) -> bool {
@@ -64,15 +61,18 @@ impl Map {
     }
 
     /// Generates an empty map, consisting entirely of solid walls
-    pub fn new(new_depth: i32) -> Map {
+    pub fn new(new_depth: i32, width: i32, height: i32) -> Map {
+        let map_length = (width * height) as usize;
+
         Map {
-            tiles: vec![TileType::Wall; Map::LENGTH],
-            width: Map::WIDTH as i32,
-            height: Map::HEIGHT as i32,
-            revealed_tiles: vec![false; Map::LENGTH],
-            visible_tiles: vec![false; Map::LENGTH],
-            blocked: vec![false; Map::LENGTH],
-            tile_content: vec![Vec::new(); Map::LENGTH],
+            tiles: vec![TileType::Wall; map_length],
+            width,
+            height,
+            map_length,
+            revealed_tiles: vec![false; map_length],
+            visible_tiles: vec![false; map_length],
+            blocked: vec![false; map_length],
+            tile_content: vec![Vec::new(); map_length],
             depth: new_depth,
             bloodstains: HashSet::new(),
             view_blocked: HashSet::new(),
@@ -164,7 +164,7 @@ pub fn draw_map(map: &Map, ctx: &mut Rltk) {
 
         // Move the coordinates
         x += 1;
-        if x > (Map::WIDTH as i32 - 1) {
+        if x > (map.width - 1) {
             x = 0;
             y += 1;
         }

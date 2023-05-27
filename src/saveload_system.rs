@@ -190,7 +190,7 @@ pub fn load_game(ecs: &mut World) {
         for (e, h) in (&entities, &helper).join() {
             let mut world_map = ecs.write_resource::<Map>();
             *world_map = h.map.clone();
-            world_map.tile_content = vec![Vec::new(); Map::LENGTH];
+            world_map.tile_content = vec![Vec::new(); world_map.map_length];
             deleteme = Some(e);
         }
         for (e, _p, pos) in (&entities, &player, &position).join() {

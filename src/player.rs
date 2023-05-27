@@ -32,8 +32,8 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
         //     return;
         // }
 
-        let new_x = (pos.x + delta_x).clamp(0, 79);
-        let new_y = (pos.y + delta_y).clamp(0, 49);
+        let new_x = (pos.x + delta_x).clamp(0, map.width);
+        let new_y = (pos.y + delta_y).clamp(0, map.height);
         let destination_idx = map.xy_idx(new_x, new_y);
 
         for potential_target in map.tile_content[destination_idx].iter() {
