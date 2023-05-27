@@ -28,8 +28,8 @@ pub struct Map {
 }
 
 impl Map {
-    pub const WIDTH: usize = 80;
-    pub const HEIGHT: usize = 43;
+    pub const WIDTH: usize = 64;
+    pub const HEIGHT: usize = 64;
     pub const LENGTH: usize = Map::HEIGHT * Map::WIDTH;
 
     pub fn xy_idx(&self, x: i32, y: i32) -> usize {
