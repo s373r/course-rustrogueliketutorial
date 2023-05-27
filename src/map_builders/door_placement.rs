@@ -4,29 +4,31 @@ use crate::map_builders::{BuilderMap, MetaMapBuilder};
 pub struct DoorPlacement {}
 
 impl MetaMapBuilder for DoorPlacement {
-    #[allow(dead_code)]
     fn build_map(&mut self, rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
         self.doors(rng, build_data);
     }
 }
 
 impl DoorPlacement {
-    #[allow(dead_code)]
     pub fn new() -> Box<DoorPlacement> {
         Box::new(DoorPlacement {})
     }
 
     fn doors(&mut self, _rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
-        if let Some(halls_original) = &build_data.corridors {
-            let halls = halls_original.clone(); // To avoid nested borrowing
+        let Some(halls) = &build_data.corridors else {
+            return;
+        };
 
-            for hall in halls.iter() {
-                if hall.len() > 2 {
-                    // We aren't interested in tiny corridors
-                    if self.door_possible(build_data, hall[0]) {
-                        build_data.spawn_list.push((hall[0], "Door".to_string()));
-                    }
-                }
+        for hall in halls.clone() {
+            // We aren't interested in tiny corridors
+            if hall.len() > 2 {
+                continue;
+            }
+
+            let door_index = hall[0];
+
+            if !self.door_possible(build_data, door_index) {
+                build_data.spawn_list.push((door_index, "Door".to_string()));
             }
         }
     }
