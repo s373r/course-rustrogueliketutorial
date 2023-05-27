@@ -6,6 +6,7 @@ pub mod common;
 mod cull_unreachable;
 mod distant_exit;
 mod dla;
+mod door_placement;
 mod drunkard;
 mod maze;
 mod prefab_builder;
@@ -38,6 +39,7 @@ use crate::map_builders::common::Corridor;
 use crate::map_builders::cull_unreachable::CullUnreachable;
 use crate::map_builders::distant_exit::DistantExit;
 use crate::map_builders::dla::DLABuilder;
+use crate::map_builders::door_placement::DoorPlacement;
 use crate::map_builders::drunkard::DrunkardsWalkBuilder;
 use crate::map_builders::maze::MazeBuilder;
 use crate::map_builders::prefab_builder::PrefabBuilder;
@@ -267,22 +269,35 @@ fn random_shape_builder(rng: &mut rltk::RandomNumberGenerator, builder: &mut Bui
 
 pub fn random_builder(new_depth: i32, rng: &mut rltk::RandomNumberGenerator) -> BuilderChain {
     let mut builder = BuilderChain::new(new_depth);
-    match rng.roll_dice(1, 2) {
-        1 => random_room_builder(rng, &mut builder),
-        _ => random_shape_builder(rng, &mut builder),
-    }
 
-    if rng.roll_dice(1, 3) == 1 {
-        builder.with(WaveformCollapseBuilder::new());
-    }
-
-    if rng.roll_dice(1, 20) == 1 {
-        builder.with(PrefabBuilder::sectional(
-            prefab_builder::prefab_sections::UNDERGROUND_FORT,
-        ));
-    }
-
-    builder.with(PrefabBuilder::vaults());
+    builder.start_with(SimpleMapBuilder::new());
+    builder.with(RoomDrawer::new());
+    builder.with(RoomSorter::new(RoomSort::Leftmost));
+    builder.with(StraightLineCorridors::new());
+    builder.with(RoomBasedSpawner::new());
+    builder.with(CorridorSpawner::new());
+    builder.with(RoomBasedStairs::new());
+    builder.with(RoomBasedStartingPosition::new());
+    builder.with(DoorPlacement::new());
 
     builder
+    // let mut builder = BuilderChain::new(new_depth);
+    // match rng.roll_dice(1, 2) {
+    //     1 => random_room_builder(rng, &mut builder),
+    //     _ => random_shape_builder(rng, &mut builder),
+    // }
+    //
+    // if rng.roll_dice(1, 3) == 1 {
+    //     builder.with(WaveformCollapseBuilder::new());
+    // }
+    //
+    // if rng.roll_dice(1, 20) == 1 {
+    //     builder.with(PrefabBuilder::sectional(
+    //         prefab_builder::prefab_sections::UNDERGROUND_FORT,
+    //     ));
+    // }
+    //
+    // builder.with(PrefabBuilder::vaults());
+    //
+    // builder
 }
