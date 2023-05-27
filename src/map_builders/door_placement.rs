@@ -15,20 +15,27 @@ impl DoorPlacement {
     }
 
     fn doors(&mut self, _rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
-        let Some(halls) = &build_data.corridors else {
-            return;
-        };
+        if let Some(halls) = &build_data.corridors {
+            for hall in halls.clone() {
+                // We aren't interested in tiny corridors
+                if hall.len() > 2 {
+                    continue;
+                }
 
-        for hall in halls.clone() {
-            // We aren't interested in tiny corridors
-            if hall.len() > 2 {
-                continue;
+                let door_index = hall[0];
+
+                if !self.door_possible(build_data, door_index) {
+                    build_data.spawn_list.push((door_index, "Door".to_string()));
+                }
             }
+        } else {
+            // There are no corridors - scan for possible places
+            let tiles = build_data.map.tiles.clone();
 
-            let door_index = hall[0];
-
-            if !self.door_possible(build_data, door_index) {
-                build_data.spawn_list.push((door_index, "Door".to_string()));
+            for (i, tile) in tiles.iter().enumerate() {
+                if *tile == TileType::Floor && self.door_possible(build_data, i) {
+                    build_data.spawn_list.push((i, "Door".to_string()));
+                }
             }
         }
     }
