@@ -468,7 +468,7 @@ impl GameState for State {
 
                         map.revealed_tiles.fill(true);
 
-                        draw_map(&map, ctx);
+                        camera::render_debug_map(&map, ctx);
 
                         map.revealed_tiles.fill(false);
                     }
@@ -476,7 +476,7 @@ impl GameState for State {
                     self.mapgen_next_state.unwrap()
                 } else {
                     ctx.cls();
-                    draw_map(&self.mapgen_history[self.mapgen_index], ctx);
+                    camera::render_debug_map(&self.mapgen_history[self.mapgen_index], ctx);
 
                     self.mapgen_timer += ctx.frame_time_ms;
 
