@@ -4,7 +4,7 @@ use specs::prelude::*;
 use crate::components::*;
 use crate::game_log::GameLog;
 use crate::map::Map;
-use crate::State;
+use crate::{camera, State};
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum MainMenuSelection {
@@ -108,23 +108,33 @@ pub fn draw_ui(ecs: &World, ctx: &mut Rltk) {
 }
 
 fn draw_tooltips(ecs: &World, ctx: &mut Rltk) {
+    let (min_x, _max_x, min_y, _max_y) = camera::get_screen_bounds(ecs, ctx);
     let map = ecs.fetch::<Map>();
     let names = ecs.read_storage::<Name>();
     let positions = ecs.read_storage::<Position>();
     let hidden = ecs.read_storage::<Hidden>();
 
     let mouse_pos = ctx.mouse_pos();
+    let mut mouse_map_pos = mouse_pos;
+    mouse_map_pos.0 += min_x;
+    mouse_map_pos.1 += min_y;
 
-    if mouse_pos.0 >= map.width || mouse_pos.1 >= map.height {
+    if mouse_map_pos.0 >= map.width - 1
+        || mouse_map_pos.1 >= map.height - 1
+        || mouse_map_pos.0 < 1
+        || mouse_map_pos.1 < 1
+    {
+        return;
+    }
+
+    if !map.visible_tiles[map.xy_idx(mouse_map_pos.0, mouse_map_pos.1)] {
         return;
     }
 
     let mut tooltip: Vec<String> = Vec::new();
 
     for (name, position, _) in (&names, &positions, !&hidden).join() {
-        let idx = map.xy_idx(position.x, position.y);
-
-        if position.x == mouse_pos.0 && position.y == mouse_pos.1 && map.visible_tiles[idx] {
+        if position.x == mouse_map_pos.0 && position.y == mouse_map_pos.1 {
             tooltip.push(name.name.to_string());
         }
     }
