@@ -221,7 +221,7 @@ impl State {
         // self.mapgen_history.clear();
 
         let mut rng = self.ecs.write_resource::<RandomNumberGenerator>();
-        let mut builder = map_builders::random_builder(new_depth, &mut rng, 64, 64);
+        let mut builder = map_builders::random_builder(new_depth, &mut rng, 80, 50);
         builder.build_map(&mut rng);
         drop(rng);
 
