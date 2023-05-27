@@ -14,7 +14,7 @@ impl DoorPlacement {
         Box::new(DoorPlacement {})
     }
 
-    fn doors(&mut self, _rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
+    fn doors(&mut self, rng: &mut rltk::RandomNumberGenerator, build_data: &mut BuilderMap) {
         if let Some(halls) = &build_data.corridors {
             for hall in halls.clone() {
                 // We aren't interested in tiny corridors
@@ -33,7 +33,10 @@ impl DoorPlacement {
             let tiles = build_data.map.tiles.clone();
 
             for (i, tile) in tiles.iter().enumerate() {
-                if *tile == TileType::Floor && self.door_possible(build_data, i) {
+                if *tile == TileType::Floor
+                    && self.door_possible(build_data, i)
+                    && rng.roll_dice(1, 3) == 1
+                {
                     build_data.spawn_list.push((i, "Door".to_string()));
                 }
             }
