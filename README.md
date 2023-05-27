@@ -98,7 +98,7 @@ Open http://0.0.0.0:8000/
   - [📝 4.16. Room Builders](https://bfnightly.bracketproductions.com/rustbook/chapter_38.html)
   - [📝 4.17. Better Corridors](https://bfnightly.bracketproductions.com/rustbook/chapter_39.html)
   - [📝 4.18. Doors](https://bfnightly.bracketproductions.com/rustbook/chapter_40.html)
-  - 🚧 4.19. Decouple map size from screen size
+  - [📝 4.19. Decouple map size from screen size](https://bfnightly.bracketproductions.com/rustbook/chapter_40.html)
   - 🚧 4.20. Section 3 Conclusion
 - 🚧 5. Section 4 - Making A Game
   - 🚧 5.1. Design Document
