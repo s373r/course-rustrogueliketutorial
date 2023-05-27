@@ -349,6 +349,22 @@ fn bear_trap(ecs: &mut World, x: i32, y: i32) {
         .build();
 }
 
+fn door(ecs: &mut World, x: i32, y: i32) {
+    ecs.create_entity()
+        .with(Position { x, y })
+        .with(Renderable {
+            glyph: rltk::to_cp437('+'),
+            fg: RGB::named(rltk::CHOCOLATE),
+            bg: RGB::named(rltk::BLACK),
+            render_order: RenderOrder::Item,
+        })
+        .with(Name {
+            name: "Door".to_string(),
+        })
+        .marked::<SimpleMarker<SerializeMe>>()
+        .build();
+}
+
 /// Spawns a named entity (name in tuple.1) at the location in (tuple.0)
 pub fn spawn_entity(ecs: &mut World, (map_idx, entity_name): &(&usize, &String)) {
     let x = (*map_idx % Map::WIDTH) as i32;
@@ -368,6 +384,7 @@ pub fn spawn_entity(ecs: &mut World, (map_idx, entity_name): &(&usize, &String))
         "Rations" => rations(ecs, x, y),
         "Magic Mapping Scroll" => magic_mapping_scroll(ecs, x, y),
         "Bear Trap" => bear_trap(ecs, x, y),
+        "Door" => door(ecs, x, y),
         _ => {}
     }
 }
