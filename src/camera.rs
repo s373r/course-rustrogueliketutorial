@@ -14,14 +14,12 @@ pub fn render_camera(ecs: &World, ctx: &mut Rltk) {
     let map_width = map.width - 1;
     let map_height = map.height - 1;
 
-    let mut y = 0;
-    for ty in min_y..max_y {
-        let mut x = 0;
-        for tx in min_x..max_x {
+    for (y, ty) in (min_y..max_y).enumerate() {
+        for (x, tx) in (min_x..max_x).enumerate() {
             if tx > 0 && tx < map_width && ty > 0 && ty < map_height {
                 let idx = map.xy_idx(tx, ty);
                 if map.revealed_tiles[idx] {
-                    let (glyph, fg, bg) = get_tile_glyph(idx, &*map);
+                    let (glyph, fg, bg) = get_tile_glyph(idx, &map);
                     ctx.set(x, y, fg, bg, glyph);
                 }
             } else if SHOW_BOUNDARIES {
@@ -33,9 +31,7 @@ pub fn render_camera(ecs: &World, ctx: &mut Rltk) {
                     rltk::to_cp437('·'),
                 );
             }
-            x += 1;
         }
-        y += 1;
     }
 
     let positions = ecs.read_storage::<Position>();
