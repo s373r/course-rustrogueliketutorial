@@ -18,7 +18,7 @@ impl DoorPlacement {
         if let Some(halls) = &build_data.corridors {
             for hall in halls.clone() {
                 // We aren't interested in tiny corridors
-                if hall.len() > 2 {
+                if hall.len() < 3 {
                     continue;
                 }
 
